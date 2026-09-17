@@ -126,21 +126,43 @@ app.post(['/api/quote', '/quote', '/api/quote.js'], async (req, res) => {
     const savedQuote = await quoteDoc.save();
     console.log('💾 Quote saved successfully to MongoDB Atlas with ID:', savedQuote._id);
 
-    // Google Sheets Webhook Dispatch (Async)
+    // Google Sheets Webhook Dispatch (Async & Resilient)
     if (GOOGLE_SHEET_WEBHOOK_URL) {
       try {
         console.log('🚀 Forwarding quote payload to Google Sheets webhook...');
-        fetch(GOOGLE_SHEET_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newQuoteData)
-        })
-        .then(res => console.log('✅ Google Sheets webhook response status:', res.status))
-        .catch(err => console.error('❌ Google Sheets webhook dispatch failed:', err.message));
+        const https = await import('https');
+        const agent = new https.Agent({ rejectUnauthorized: false });
+        
+        const postToSheet = (url, bodyData) => {
+          try {
+            const req = https.request(url, {
+              method: 'POST',
+              agent,
+              headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(bodyData)
+              }
+            }, (res) => {
+              if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                postToSheet(res.headers.location, bodyData);
+                return;
+              }
+              console.log('✅ Google Sheets webhook response status:', res.statusCode);
+            });
+            req.on('error', err => console.warn('⚠️ Google Sheets webhook dispatch warning:', err.message));
+            req.write(bodyData);
+            req.end();
+          } catch (e) {
+            console.warn('⚠️ Google Sheets webhook dispatch error:', e.message);
+          }
+        };
+
+        postToSheet(GOOGLE_SHEET_WEBHOOK_URL, JSON.stringify(newQuoteData));
       } catch (webhookErr) {
-        console.error('❌ Google Sheets webhook error:', webhookErr.message);
+        console.warn('⚠️ Google Sheets webhook error:', webhookErr.message);
       }
     }
+
 
     res.status(201).json({
       success: true,
