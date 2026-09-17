@@ -1337,7 +1337,24 @@ function initQuoteModal() {
     });
   }
 
-  if (getQuoteBtn) getQuoteBtn.addEventListener('click', openModal);
+  // Bind all quote modal triggers across the website
+  const triggerSelectors = [
+    '#footer-get-quote-btn',
+    '#header-book-film-btn',
+    '.header-actions .btn-primary',
+    '.header-actions .btn',
+    '.open-quote-modal'
+  ];
+
+  triggerSelectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    });
+  });
+
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (backdrop) backdrop.addEventListener('click', closeModal);
 
@@ -1353,10 +1370,10 @@ function initQuoteModal() {
 
   const lbInquireBtn = document.getElementById('lb-inquire-btn');
   const storyInquireBtn = document.getElementById('story-inquire-btn');
-  const bookHeaderBtn = document.querySelector('.header-actions .btn-primary');
 
   if (lbInquireBtn) {
-    lbInquireBtn.addEventListener('click', () => {
+    lbInquireBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       const lbModal = document.getElementById('lightbox-modal');
       if (lbModal) lbModal.classList.remove('active');
       openModal();
@@ -1364,20 +1381,15 @@ function initQuoteModal() {
   }
 
   if (storyInquireBtn) {
-    storyInquireBtn.addEventListener('click', () => {
+    storyInquireBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       const filmModal = document.getElementById('film-story-modal');
       if (filmModal) filmModal.classList.remove('active');
       openModal();
     });
   }
-
-  if (bookHeaderBtn) {
-    bookHeaderBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      openModal();
-    });
-  }
 }
+
 
 // ==========================================================================
 // INITIALIZATION
