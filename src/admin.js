@@ -329,30 +329,89 @@ function populateAdminForms() {
   initLiveMediaPreviewListeners();
 }
 
+function setupFileUploadButton(btn, inputEl, previewEl1, previewEl2) {
+  if (!btn || !inputEl) return;
+
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'file';
+  hiddenInput.accept = 'image/*,video/*';
+  hiddenInput.style.display = 'none';
+  document.body.appendChild(hiddenInput);
+
+  btn.addEventListener('click', () => {
+    hiddenInput.click();
+  });
+
+  hiddenInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const originalBtnHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+      Processing...
+    `;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const dataUrl = evt.target.result;
+      inputEl.value = dataUrl;
+      inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+      if (previewEl1) previewEl1.src = dataUrl;
+      if (previewEl2) previewEl2.src = dataUrl;
+
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Uploaded!
+      `;
+      setTimeout(() => {
+        btn.innerHTML = originalBtnHTML;
+      }, 2500);
+
+      showToast('File uploaded successfully! Click "Save All Content Changes" to make it live.');
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
 function initLiveMediaPreviewListeners() {
   const hv1 = document.getElementById('hero-video-1');
   const hv2 = document.getElementById('hero-video-2');
+  const hv1Btn = document.getElementById('upload-btn-hero-1');
+  const hv2Btn = document.getElementById('upload-btn-hero-2');
+  const v1Prev = document.getElementById('hero-video-1-preview');
+  const v2Prev = document.getElementById('hero-video-2-preview');
+
   if (hv1) {
     hv1.addEventListener('input', (e) => {
-      const v = document.getElementById('hero-video-1-preview');
-      if (v) v.src = e.target.value.trim();
+      if (v1Prev) v1Prev.src = e.target.value.trim();
     });
   }
   if (hv2) {
     hv2.addEventListener('input', (e) => {
-      const v = document.getElementById('hero-video-2-preview');
-      if (v) v.src = e.target.value.trim();
+      if (v2Prev) v2Prev.src = e.target.value.trim();
     });
   }
 
+  setupFileUploadButton(hv1Btn, hv1, v1Prev);
+  setupFileUploadButton(hv2Btn, hv2, v2Prev);
+
   for (let i = 1; i <= 4; i++) {
     const input = document.getElementById(`about-img-${i}`);
+    const img = document.getElementById(`about-img-${i}-preview`);
+    const btn = document.getElementById(`upload-btn-about-${i}`);
+
     if (input) {
       input.addEventListener('input', (e) => {
-        const img = document.getElementById(`about-img-${i}-preview`);
         if (img) img.src = e.target.value.trim();
       });
     }
+
+    setupFileUploadButton(btn, input, img);
   }
 }
 
@@ -394,7 +453,13 @@ function renderFilmsManager() {
         </div>
         <div class="admin-form-group col-full">
           <label class="admin-label">Video URL (.mp4 file link)</label>
-          <input type="text" class="admin-input film-videourl" value="${film.videoUrl || ''}">
+          <div class="admin-thumb-row">
+            <input type="text" class="admin-input film-videourl" value="${film.videoUrl || ''}">
+            <button type="button" class="admin-upload-btn btn-upload-film-video" data-index="${idx}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Upload Video
+            </button>
+          </div>
         </div>
         <div class="admin-form-group col-full">
           <label class="admin-label">Cover Poster Image URL</label>
@@ -404,6 +469,10 @@ function renderFilmsManager() {
               <span class="admin-thumb-badge">POSTER</span>
             </div>
             <input type="text" class="admin-input film-poster" data-preview-target="film-poster-preview-${idx}" value="${film.poster || ''}">
+            <button type="button" class="admin-upload-btn btn-upload-film-poster" data-index="${idx}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Upload Poster
+            </button>
           </div>
         </div>
         <div class="admin-form-group col-full">
@@ -418,13 +487,26 @@ function renderFilmsManager() {
     </div>
   `).join('');
 
-  // Live Poster Input Listeners
-  container.querySelectorAll('.film-poster').forEach(input => {
-    input.addEventListener('input', (e) => {
-      const targetClass = e.target.getAttribute('data-preview-target');
-      const img = container.querySelector('.' + targetClass);
-      if (img) img.src = e.target.value.trim();
-    });
+  // Live Poster Input Listeners & Upload Buttons
+  container.querySelectorAll('.admin-item-box').forEach(box => {
+    const posterInput = box.querySelector('.film-poster');
+    const posterBtn = box.querySelector('.btn-upload-film-poster');
+    const videoInput = box.querySelector('.film-videourl');
+    const videoBtn = box.querySelector('.btn-upload-film-video');
+    const idx = box.getAttribute('data-film-index');
+    const imgPreview = box.querySelector(`.film-poster-preview-${idx}`);
+    const thumbPreview = box.querySelector(`.film-thumb-preview-${idx}`);
+
+    if (posterInput) {
+      posterInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (imgPreview) imgPreview.src = val;
+        if (thumbPreview) thumbPreview.src = val;
+      });
+    }
+
+    setupFileUploadButton(posterBtn, posterInput, imgPreview, thumbPreview);
+    setupFileUploadButton(videoBtn, videoInput);
   });
 
   container.querySelectorAll('.delete-film-btn').forEach(btn => {
@@ -491,11 +573,21 @@ function renderPortfolioManager() {
               <span class="admin-thumb-badge">IMAGE</span>
             </div>
             <input type="text" class="admin-input port-image" data-preview-header="port-header-preview-${idx}" data-preview-target="port-img-preview-${idx}" value="${item.image || ''}">
+            <button type="button" class="admin-upload-btn btn-upload-port-img" data-index="${idx}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Upload Image
+            </button>
           </div>
         </div>
         <div class="admin-form-group col-full">
           <label class="admin-label">Video URL (Optional Motion Still)</label>
-          <input type="text" class="admin-input port-videourl" value="${item.videoUrl || ''}">
+          <div class="admin-thumb-row">
+            <input type="text" class="admin-input port-videourl" value="${item.videoUrl || ''}">
+            <button type="button" class="admin-upload-btn btn-upload-port-video" data-index="${idx}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Upload Video
+            </button>
+          </div>
         </div>
         <div class="admin-form-group">
           <label class="admin-label">EXIF Camera</label>
@@ -517,17 +609,26 @@ function renderPortfolioManager() {
     </div>
   `).join('');
 
-  // Live Image Input Listeners
-  container.querySelectorAll('.port-image').forEach(input => {
-    input.addEventListener('input', (e) => {
-      const targetClass = e.target.getAttribute('data-preview-target');
-      const headerClass = e.target.getAttribute('data-preview-header');
-      const val = e.target.value.trim();
-      const img1 = container.querySelector('.' + targetClass);
-      const img2 = container.querySelector('.' + headerClass);
-      if (img1) img1.src = val;
-      if (img2) img2.src = val;
-    });
+  // Live Image Input Listeners & Upload Buttons
+  container.querySelectorAll('.admin-item-box').forEach(box => {
+    const imgInput = box.querySelector('.port-image');
+    const imgBtn = box.querySelector('.btn-upload-port-img');
+    const videoInput = box.querySelector('.port-videourl');
+    const videoBtn = box.querySelector('.btn-upload-port-video');
+    const idx = box.getAttribute('data-port-index');
+    const imgPreview = box.querySelector(`.port-img-preview-${idx}`);
+    const headerPreview = box.querySelector(`.port-header-preview-${idx}`);
+
+    if (imgInput) {
+      imgInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (imgPreview) imgPreview.src = val;
+        if (headerPreview) headerPreview.src = val;
+      });
+    }
+
+    setupFileUploadButton(imgBtn, imgInput, imgPreview, headerPreview);
+    setupFileUploadButton(videoBtn, videoInput);
   });
 
   container.querySelectorAll('.delete-port-btn').forEach(btn => {
