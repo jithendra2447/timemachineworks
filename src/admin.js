@@ -1,12 +1,76 @@
 import { PORTFOLIO_ITEMS, HERO_VIDEOS, EXHIBITIONS, MONOGRAPHS } from './data/portfolio.js';
 
+const DEFAULT_WEDDING_FILMS = [
+  {
+    id: "film-niharika",
+    title: "Niharika's Lakshmi Devi Vratham",
+    location: "Sacred Kalasham Pooja & Blessings",
+    duration: "410K Views • Full HD Cinema",
+    videoUrl: "./videos/hero-wedding.mp4",
+    poster: "./images/niharika/main-shrine-couple.jpg",
+    stills: ["./images/niharika/lotus-portrait.jpg", "./images/niharika/pooja-lighting.jpg", "./images/niharika/doorway-portrait.jpg"],
+    reviewQuote: "Timemachine & Co captured our sacred Lakshmi Devi Vratham ceremony with incredible warmth and reverence."
+  },
+  {
+    id: "film-maitri-aneesh",
+    title: "Maitri & Aneesh",
+    location: "Lake Como • Italy",
+    duration: "04:15 • 4K Cinema",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-waves-crashing-on-a-rocky-shore-42901-large.mp4",
+    poster: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=85&w=800",
+    stills: ["https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=85&w=800"],
+    reviewQuote: "Coastal estate processional film featuring sunset boat entrance over Lake Como."
+  },
+  {
+    id: "film-dhruv-pippa",
+    title: "Dhruv & Pippa",
+    location: "St. Moritz • Switzerland",
+    duration: "05:40 • 8K RAW Cinema",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-timelapse-of-clouds-over-a-mountain-range-42894-large.mp4",
+    poster: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=85&w=800",
+    stills: ["https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=85&w=800"],
+    reviewQuote: "Highland solitude vows surrounded by snowcapped Swiss alpine peaks."
+  },
+  {
+    id: "film-palak-priya",
+    title: "Palak & Priya",
+    location: "Amalfi Coast • Italy",
+    duration: "03:50 • 4K Cinema",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-fog-over-a-forest-in-a-mountainous-region-42898-large.mp4",
+    poster: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=85&w=800",
+    stills: ["https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=85&w=800"],
+    reviewQuote: "Rose petal shower celebration along Villa Cimbrone cliffside in Ravello."
+  },
+  {
+    id: "film-ira-sameer",
+    title: "Ira & Sameer",
+    location: "Kyoto • Japan",
+    duration: "04:30 • 4K Cinema",
+    videoUrl: "./videos/hero-wedding.mp4",
+    poster: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=85&w=800",
+    stills: ["https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=85&w=800"],
+    reviewQuote: "Serene bamboo grove sanctuary ceremony in historic Kyoto."
+  },
+  {
+    id: "film-rohan-ananya",
+    title: "Rohan & Ananya",
+    location: "Santorini • Greece",
+    duration: "06:10 • 4K 120fps Cinema",
+    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-waves-crashing-on-a-rocky-shore-42901-large.mp4",
+    poster: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=85&w=800",
+    stills: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=85&w=800"],
+    reviewQuote: "Volcanic caldera cliffside sunset vows with intimate dinner reception."
+  }
+];
+
 // Global state for Admin Panel Content
 let activeContent = {
   hero: {
     headline: 'Timemachine & Co',
     subtitle: 'timeless cinematic wedding stories',
     videos: [
-      { title: 'Lake Como Villa d\'Este Wedding', videoUrl: './videos/hero-wedding.mp4', poster: './images/niharika/main-shrine-couple.jpg' }
+      { title: 'Primary Hero Video', videoUrl: './videos/hero-wedding.mp4', poster: './images/niharika/main-shrine-couple.jpg' },
+      { title: 'Lake Como Highlight', videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-waves-crashing-on-a-rocky-shore-42901-large.mp4', poster: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=85&w=800' }
     ]
   },
   about: {
@@ -24,7 +88,7 @@ let activeContent = {
       './images/niharika/preparation.jpg'
     ]
   },
-  weddingFilms: [...EXHIBITIONS],
+  weddingFilms: [...DEFAULT_WEDDING_FILMS],
   portfolio: [...PORTFOLIO_ITEMS]
 };
 
@@ -242,11 +306,54 @@ function populateAdminForms() {
   if (img3Input) img3Input.value = activeContent.about.collageImages?.[2] || '';
   if (img4Input) img4Input.value = activeContent.about.collageImages?.[3] || '';
 
+  // Update Hero video preview sources
+  const v1Prev = document.getElementById('hero-video-1-preview');
+  const v2Prev = document.getElementById('hero-video-2-preview');
+  if (v1Prev && v1Input?.value) v1Prev.src = v1Input.value;
+  if (v2Prev && v2Input?.value) v2Prev.src = v2Input.value;
+
+  // Update About collage image preview sources
+  for (let i = 1; i <= 4; i++) {
+    const inp = document.getElementById(`about-img-${i}`);
+    const prv = document.getElementById(`about-img-${i}-preview`);
+    if (inp && prv && inp.value) prv.src = inp.value;
+  }
+
   // Wedding Films
   renderFilmsManager();
 
   // Portfolio
   renderPortfolioManager();
+
+  // Attach live input listeners
+  initLiveMediaPreviewListeners();
+}
+
+function initLiveMediaPreviewListeners() {
+  const hv1 = document.getElementById('hero-video-1');
+  const hv2 = document.getElementById('hero-video-2');
+  if (hv1) {
+    hv1.addEventListener('input', (e) => {
+      const v = document.getElementById('hero-video-1-preview');
+      if (v) v.src = e.target.value.trim();
+    });
+  }
+  if (hv2) {
+    hv2.addEventListener('input', (e) => {
+      const v = document.getElementById('hero-video-2-preview');
+      if (v) v.src = e.target.value.trim();
+    });
+  }
+
+  for (let i = 1; i <= 4; i++) {
+    const input = document.getElementById(`about-img-${i}`);
+    if (input) {
+      input.addEventListener('input', (e) => {
+        const img = document.getElementById(`about-img-${i}-preview`);
+        if (img) img.src = e.target.value.trim();
+      });
+    }
+  }
 }
 
 function renderFilmsManager() {
@@ -256,7 +363,16 @@ function renderFilmsManager() {
   container.innerHTML = activeContent.weddingFilms.map((film, idx) => `
     <div class="admin-item-box" data-film-index="${idx}">
       <div class="admin-item-header">
-        <h4 class="admin-item-title">${film.title || 'Untitled Film'} — ${film.location || ''}</h4>
+        <div style="display:flex; align-items:center; gap: 1rem;">
+          <div class="admin-media-preview-box" style="width: 90px; height: 60px;">
+            <img class="film-thumb-preview-${idx}" src="${film.poster || './images/niharika/main-shrine-couple.jpg'}" alt="${film.title || 'Film Poster'}" onerror="this.src='./images/niharika/main-shrine-couple.jpg'">
+            <span class="admin-thumb-badge">FILM</span>
+          </div>
+          <div>
+            <h4 class="admin-item-title" style="margin:0; font-size: 1.15rem;">${film.title || 'Untitled Film'}</h4>
+            <span style="font-size: 0.8rem; color: var(--color-body-muted);">${film.location || 'Destination Film'}</span>
+          </div>
+        </div>
         <button type="button" class="admin-btn-delete delete-film-btn" data-index="${idx}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           Delete Film
@@ -282,7 +398,13 @@ function renderFilmsManager() {
         </div>
         <div class="admin-form-group col-full">
           <label class="admin-label">Cover Poster Image URL</label>
-          <input type="text" class="admin-input film-poster" value="${film.poster || ''}">
+          <div class="admin-thumb-row">
+            <div class="admin-media-preview-box">
+              <img class="film-poster-preview-${idx}" src="${film.poster || './images/niharika/main-shrine-couple.jpg'}" alt="Poster Preview" onerror="this.src='./images/niharika/main-shrine-couple.jpg'">
+              <span class="admin-thumb-badge">POSTER</span>
+            </div>
+            <input type="text" class="admin-input film-poster" data-preview-target="film-poster-preview-${idx}" value="${film.poster || ''}">
+          </div>
         </div>
         <div class="admin-form-group col-full">
           <label class="admin-label">Stills Gallery Image URLs (comma separated)</label>
@@ -295,6 +417,15 @@ function renderFilmsManager() {
       </div>
     </div>
   `).join('');
+
+  // Live Poster Input Listeners
+  container.querySelectorAll('.film-poster').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const targetClass = e.target.getAttribute('data-preview-target');
+      const img = container.querySelector('.' + targetClass);
+      if (img) img.src = e.target.value.trim();
+    });
+  });
 
   container.querySelectorAll('.delete-film-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -314,7 +445,16 @@ function renderPortfolioManager() {
   container.innerHTML = activeContent.portfolio.map((item, idx) => `
     <div class="admin-item-box" data-port-index="${idx}">
       <div class="admin-item-header">
-        <h4 class="admin-item-title">${item.title || 'Untitled Still'} (${item.category ? item.category.toUpperCase() : 'ALL'})</h4>
+        <div style="display:flex; align-items:center; gap: 1rem;">
+          <div class="admin-media-preview-box" style="width: 75px; height: 75px;">
+            <img class="port-header-preview-${idx}" src="${item.image || './images/niharika/lotus-portrait.jpg'}" alt="${item.title || 'Still'}" onerror="this.src='./images/niharika/lotus-portrait.jpg'">
+            <span class="admin-thumb-badge">${(item.category || 'STILL').toUpperCase()}</span>
+          </div>
+          <div>
+            <h4 class="admin-item-title" style="margin:0; font-size: 1.1rem;">${item.title || 'Untitled Still'}</h4>
+            <span style="font-size: 0.8rem; color: var(--color-body-muted);">${item.location || 'Portfolio Gallery Image'}</span>
+          </div>
+        </div>
         <button type="button" class="admin-btn-delete delete-port-btn" data-index="${idx}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           Delete Item
@@ -329,7 +469,7 @@ function renderPortfolioManager() {
         <div class="admin-form-group">
           <label class="admin-label">Category Filter</label>
           <select class="admin-select port-category">
-            <option value="stories" ${item.category === 'stories' ? 'selected' : ''}>Wedding Stories</option>
+            <option value="stories" ${item.category === 'stories' || item.category === 'wedding' ? 'selected' : ''}>Wedding Stories</option>
             <option value="films" ${item.category === 'films' ? 'selected' : ''}>Wedding Films</option>
             <option value="couple" ${item.category === 'couple' ? 'selected' : ''}>Couple Shoot</option>
             <option value="editorial" ${item.category === 'editorial' ? 'selected' : ''}>Editorial Fine Art</option>
@@ -345,7 +485,13 @@ function renderPortfolioManager() {
         </div>
         <div class="admin-form-group col-full">
           <label class="admin-label">Image URL</label>
-          <input type="text" class="admin-input port-image" value="${item.image || ''}">
+          <div class="admin-thumb-row">
+            <div class="admin-media-preview-box">
+              <img class="port-img-preview-${idx}" src="${item.image || './images/niharika/lotus-portrait.jpg'}" alt="Preview" onerror="this.src='./images/niharika/lotus-portrait.jpg'">
+              <span class="admin-thumb-badge">IMAGE</span>
+            </div>
+            <input type="text" class="admin-input port-image" data-preview-header="port-header-preview-${idx}" data-preview-target="port-img-preview-${idx}" value="${item.image || ''}">
+          </div>
         </div>
         <div class="admin-form-group col-full">
           <label class="admin-label">Video URL (Optional Motion Still)</label>
@@ -370,6 +516,19 @@ function renderPortfolioManager() {
       </div>
     </div>
   `).join('');
+
+  // Live Image Input Listeners
+  container.querySelectorAll('.port-image').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const targetClass = e.target.getAttribute('data-preview-target');
+      const headerClass = e.target.getAttribute('data-preview-header');
+      const val = e.target.value.trim();
+      const img1 = container.querySelector('.' + targetClass);
+      const img2 = container.querySelector('.' + headerClass);
+      if (img1) img1.src = val;
+      if (img2) img2.src = val;
+    });
+  });
 
   container.querySelectorAll('.delete-port-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {

@@ -536,6 +536,57 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Live Media Thumbnails & Video Previews in Admin */
+    .admin-thumb-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      width: 100%;
+    }
+
+    .admin-media-preview-box {
+      width: 110px;
+      height: 75px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #1A1816;
+      border: 1px solid var(--color-border-light);
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .admin-media-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .admin-media-preview-box video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .admin-thumb-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: rgba(26, 24, 22, 0.85);
+      color: #FFFFFF;
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.12rem 0.4rem;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
   </style>
 </head>
 <body class="admin-body">
@@ -691,12 +742,24 @@
 
             <div class="admin-form-group col-full">
               <label class="admin-label">Background Video 1 URL (Primary Default)</label>
-              <input type="text" id="hero-video-1" class="admin-input" placeholder="./videos/hero-wedding.mp4 or https://...">
+              <div class="admin-thumb-row">
+                <div class="admin-media-preview-box">
+                  <video id="hero-video-1-preview" src="./videos/hero-wedding.mp4" muted loop playsinline autoplay style="width:100%; height:100%; object-fit:cover;"></video>
+                  <span class="admin-thumb-badge">VIDEO 1</span>
+                </div>
+                <input type="text" id="hero-video-1" class="admin-input" placeholder="./videos/hero-wedding.mp4 or https://...">
+              </div>
             </div>
 
             <div class="admin-form-group col-full">
               <label class="admin-label">Background Video 2 URL (Lake Como Highlight)</label>
-              <input type="text" id="hero-video-2" class="admin-input" placeholder="./videos/hero-wedding.mp4 or https://...">
+              <div class="admin-thumb-row">
+                <div class="admin-media-preview-box">
+                  <video id="hero-video-2-preview" src="https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-waves-crashing-on-a-rocky-shore-42901-large.mp4" muted loop playsinline autoplay style="width:100%; height:100%; object-fit:cover;"></video>
+                  <span class="admin-thumb-badge">VIDEO 2</span>
+                </div>
+                <input type="text" id="hero-video-2" class="admin-input" placeholder="./videos/hero-wedding.mp4 or https://...">
+              </div>
             </div>
           </div>
         </div>
@@ -788,23 +851,47 @@
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-label">Collage Photo 1 URL (Tall Left Portrait)</label>
-              <input type="text" id="about-img-1" class="admin-input">
+              <label class="admin-label">Collage Photo 1 (Tall Left Portrait)</label>
+              <div class="admin-thumb-row">
+                <div class="admin-media-preview-box">
+                  <img id="about-img-1-preview" src="./images/niharika/lotus-portrait.jpg" alt="Photo 1">
+                  <span class="admin-thumb-badge">PHOTO 1</span>
+                </div>
+                <input type="text" id="about-img-1" class="admin-input">
+              </div>
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-label">Collage Photo 2 URL (Right Stack Top)</label>
-              <input type="text" id="about-img-2" class="admin-input">
+              <label class="admin-label">Collage Photo 2 (Right Stack Top)</label>
+              <div class="admin-thumb-row">
+                <div class="admin-media-preview-box">
+                  <img id="about-img-2-preview" src="./images/niharika/pooja-lighting.jpg" alt="Photo 2">
+                  <span class="admin-thumb-badge">PHOTO 2</span>
+                </div>
+                <input type="text" id="about-img-2" class="admin-input">
+              </div>
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-label">Collage Photo 3 URL (Right Stack Middle)</label>
-              <input type="text" id="about-img-3" class="admin-input">
+              <label class="admin-label">Collage Photo 3 (Right Stack Middle)</label>
+              <div class="admin-thumb-row">
+                <div class="admin-media-preview-box">
+                  <img id="about-img-3-preview" src="./images/niharika/bridal-braid.jpg" alt="Photo 3">
+                  <span class="admin-thumb-badge">PHOTO 3</span>
+                </div>
+                <input type="text" id="about-img-3" class="admin-input">
+              </div>
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-label">Collage Photo 4 URL (Right Stack Bottom)</label>
-              <input type="text" id="about-img-4" class="admin-input">
+              <label class="admin-label">Collage Photo 4 (Right Stack Bottom)</label>
+              <div class="admin-thumb-row">
+                <div class="admin-media-preview-box">
+                  <img id="about-img-4-preview" src="./images/niharika/preparation.jpg" alt="Photo 4">
+                  <span class="admin-thumb-badge">PHOTO 4</span>
+                </div>
+                <input type="text" id="about-img-4" class="admin-input">
+              </div>
             </div>
           </div>
         </div>
