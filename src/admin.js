@@ -910,8 +910,60 @@ function bindQuotationEvents() {
 
   const printBtn = document.getElementById('btn-print-proposal');
   if (printBtn) {
-    printBtn.addEventListener('click', () => {
-      window.print();
+    printBtn.addEventListener('click', async () => {
+      const element = document.getElementById('proposal-template-preview');
+      if (!element) return;
+
+      showToast('Generating high-resolution luxury PDF...');
+
+      if (typeof window.html2pdf === 'function') {
+        const originalText = printBtn.innerHTML;
+        printBtn.disabled = true;
+        printBtn.innerHTML = `⏳ Preparing PDF...`;
+
+        // Temporarily swap videos with poster images for clean canvas rendering
+        const videos = element.querySelectorAll('video');
+        const videoParents = [];
+        videos.forEach(v => {
+          const img = document.createElement('img');
+          img.src = v.poster || './videos/preview_check.jpg';
+          img.style.cssText = v.style.cssText;
+          img.className = 'pdf-temp-video-poster';
+          v.parentNode.insertBefore(img, v);
+          v.style.display = 'none';
+          videoParents.push({ video: v, posterImg: img });
+        });
+
+        const clientName = (activeQuotation.clientName || 'Bhavya_Allu').replace(/[^a-zA-Z0-9]/g, '_');
+        const opt = {
+          margin:       [0.3, 0.3, 0.3, 0.3],
+          filename:     `Timemachine_Quotation_${clientName}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+          pagebreak:    { mode: ['css', 'legacy'] }
+        };
+
+        try {
+          await window.html2pdf().set(opt).from(element).save();
+          showToast('PDF proposal downloaded successfully!');
+        } catch (err) {
+          console.warn('html2pdf error, falling back to window.print():', err);
+          window.print();
+        } finally {
+          // Restore video elements
+          videoParents.forEach(item => {
+            if (item.posterImg && item.posterImg.parentNode) {
+              item.posterImg.parentNode.removeChild(item.posterImg);
+            }
+            item.video.style.display = 'block';
+          });
+          printBtn.disabled = false;
+          printBtn.innerHTML = originalText;
+        }
+      } else {
+        window.print();
+      }
     });
   }
 
@@ -1553,7 +1605,7 @@ function renderProposalPreview() {
           </h3>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.25rem; margin-bottom: 3rem;">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; width: 100%; max-width: 100%; box-sizing: border-box; margin-bottom: 2.5rem;">
           <!-- CLICKABLE PHONE / WHATSAPP -->
           <a href="https://wa.me/919705632982" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; text-align: center; background: #F3EBDD; border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 12px; padding: 1.5rem; transition: transform 0.2s ease, box-shadow 0.2s ease;">
             <div style="width: 46px; height: 46px; border-radius: 50%; background: #1A1816; color: #C5A059; display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.12);">
