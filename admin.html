@@ -760,6 +760,12 @@
             <button type="button" class="admin-subnav-btn" data-jump="sec-about">
               <span class="subnav-dot"></span> 4. About Story
             </button>
+            <button type="button" class="admin-subnav-btn" data-jump="sec-story">
+              <span class="subnav-dot"></span> 5. Founders Story
+            </button>
+            <button type="button" class="admin-subnav-btn" data-jump="sec-contact">
+              <span class="subnav-dot"></span> 6. Contact & Footer
+            </button>
           </div>
 
           <div class="sidebar-nav-title" style="margin-top: 1.5rem;">CLIENT INQUIRIES & LEADS</div>
@@ -794,13 +800,15 @@
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div>
               <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: var(--color-heading); margin: 0;">Entire Home Page Editor</h2>
-              <p style="font-size: 0.88rem; color: var(--color-body-muted); margin-top: 0.25rem;">Edit all 4 Home Page sections on a single continuous page. Changes save directly to MongoDB Atlas.</p>
+              <p style="font-size: 0.88rem; color: var(--color-body-muted); margin-top: 0.25rem;">Edit all 6 Home Page sections on a single continuous page. Changes save directly to MongoDB Atlas.</p>
             </div>
             <div class="admin-jump-bar" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               <button type="button" class="admin-jump-chip active" data-jump="sec-hero">1. Hero Section</button>
               <button type="button" class="admin-jump-chip" data-jump="sec-films">2. Wedding Films</button>
               <button type="button" class="admin-jump-chip" data-jump="sec-portfolio">3. Selected Works</button>
               <button type="button" class="admin-jump-chip" data-jump="sec-about">4. About Story</button>
+              <button type="button" class="admin-jump-chip" data-jump="sec-story">5. Founders Story</button>
+              <button type="button" class="admin-jump-chip" data-jump="sec-contact">6. Contact & Footer</button>
             </div>
           </div>
         </div>
@@ -998,6 +1006,111 @@
                   Upload Photo
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. FOUNDERS & CELEBRATION STORY CARD -->
+        <div class="admin-card" id="sec-story">
+          <div class="admin-card-header">
+            <div>
+              <h3 class="admin-card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                5. Celebrating Love & Founders Story
+              </h3>
+              <p class="admin-card-desc">Update the studio founders portrait image and celebration narrative copy.</p>
+            </div>
+          </div>
+
+          <div class="admin-form-grid">
+            <div class="admin-form-group col-full">
+              <label class="admin-label">Main Story Heading</label>
+              <input type="text" id="story-title-input" class="admin-input" placeholder="Celebrating Love with Every Frame">
+            </div>
+
+            <div class="admin-form-group col-full">
+              <label class="admin-label">Founders Photo URL</label>
+              <div class="admin-thumb-row">
+                <div class="admin-media-preview-box">
+                  <img id="story-img-preview" src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=85&w=800" alt="Founders">
+                  <span class="admin-thumb-badge">PHOTO</span>
+                </div>
+                <input type="text" id="story-img-input" class="admin-input">
+                <button type="button" class="admin-upload-btn" id="upload-btn-story-img">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  Upload Photo
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-form-group col-full">
+              <label class="admin-label">Story Paragraph 1 (Brand Origins)</label>
+              <textarea id="story-p1-input" class="admin-textarea"></textarea>
+            </div>
+
+            <div class="admin-form-group col-full">
+              <label class="admin-label">Story Paragraph 2 (Candid Aesthetics)</label>
+              <textarea id="story-p2-input" class="admin-textarea"></textarea>
+            </div>
+
+            <div class="admin-form-group col-full">
+              <label class="admin-label">Story Paragraph 3 (Global Milestones)</label>
+              <textarea id="story-p3-input" class="admin-textarea"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. CONTACT & SOCIAL LINKS FOOTER CARD -->
+        <div class="admin-card" id="sec-contact">
+          <div class="admin-card-header">
+            <div>
+              <h3 class="admin-card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                6. Studio Contact & Social Links Footer
+              </h3>
+              <p class="admin-card-desc">Update footer brand details, pricing proposal texts, and studio social media channel links.</p>
+            </div>
+          </div>
+
+          <div class="admin-form-grid">
+            <div class="admin-form-group">
+              <label class="admin-label">Studio Brand Name</label>
+              <input type="text" id="footer-brand-input" class="admin-input" placeholder="Timemachine & Co">
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-label">Studio Locations</label>
+              <input type="text" id="footer-locations-input" class="admin-input" placeholder="Zürich • Lake Como • Ravello • New York">
+            </div>
+
+            <div class="admin-form-group col-full">
+              <label class="admin-label">Footer Tagline</label>
+              <input type="text" id="footer-tagline-input" class="admin-input" placeholder="Timeless Cinematic Wedding Stories & Fine Art Archive.">
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-label">Commission Box Title</label>
+              <input type="text" id="footer-quote-title-input" class="admin-input" placeholder="COMMISSION & PRICING">
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-label">Commission Box Description</label>
+              <input type="text" id="footer-quote-desc-input" class="admin-input" placeholder="Request a custom proposal tailored to your celebration dates and destination.">
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-label">Instagram Link</label>
+              <input type="text" id="footer-instagram-input" class="admin-input" placeholder="https://instagram.com">
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-label">YouTube Channel Link</label>
+              <input type="text" id="footer-youtube-input" class="admin-input" placeholder="https://youtube.com">
+            </div>
+
+            <div class="admin-form-group col-full">
+              <label class="admin-label">WhatsApp Contact Link</label>
+              <input type="text" id="footer-whatsapp-input" class="admin-input" placeholder="https://wa.me">
             </div>
           </div>
         </div>

@@ -88,6 +88,25 @@ let activeContent = {
       './images/niharika/preparation.jpg'
     ]
   },
+  foundersStory: {
+    title: 'Celebrating Love with Every Frame',
+    foundersImage: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=85&w=800',
+    paragraphs: [
+      "When we started Timemachine & Co, it was more than just about clicking pictures—it was about capturing love, joy, and everything in between. Our shared passion for cinema, art, and visual storytelling brought us together, and the rest, as they say, is history.",
+      "Our journey has been nothing short of magical. Inspired by travel, fine art photography, and our love for experimenting with light, we've crafted a unique style—a mix of candid moments, editorial aesthetics, and fashion vibes. It's not just photography for us; it's weaving stories that couples cherish forever.",
+      "From being part of 600+ destination weddings to earning titles like 'Wedding Photographer and Filmmaker of the Year,' this adventure has been surreal. And with over 23 million views on our wedding films, we're reminded daily of the love we've been blessed to capture."
+    ]
+  },
+  footer: {
+    brandName: 'Timemachine & Co',
+    tagline: 'Timeless Cinematic Wedding Stories & Fine Art Archive.',
+    locations: 'Zürich • Lake Como • Ravello • New York',
+    quoteTitle: 'COMMISSION & PRICING',
+    quoteDesc: 'Request a custom proposal tailored to your celebration dates and destination.',
+    instagram: 'https://instagram.com',
+    youtube: 'https://youtube.com',
+    whatsapp: 'https://wa.me'
+  },
   weddingFilms: [...DEFAULT_WEDDING_FILMS],
   portfolio: [...PORTFOLIO_ITEMS]
 };
@@ -299,6 +318,8 @@ async function loadContent() {
       const c = data.data;
       if (c.hero) activeContent.hero = c.hero;
       if (c.about) activeContent.about = c.about;
+      if (c.foundersStory) activeContent.foundersStory = c.foundersStory;
+      if (c.footer) activeContent.footer = c.footer;
       if (Array.isArray(c.weddingFilms) && c.weddingFilms.length) activeContent.weddingFilms = c.weddingFilms;
       if (Array.isArray(c.portfolio) && c.portfolio.length) activeContent.portfolio = c.portfolio;
     }
@@ -345,6 +366,48 @@ function populateAdminForms() {
   if (img3Input) img3Input.value = activeContent.about.collageImages?.[2] || '';
   if (img4Input) img4Input.value = activeContent.about.collageImages?.[3] || '';
 
+  // Founders Story (Card 5)
+  const storyTitle = document.getElementById('story-title-input');
+  const storyImg = document.getElementById('story-img-input');
+  const storyP1 = document.getElementById('story-p1-input');
+  const storyP2 = document.getElementById('story-p2-input');
+  const storyP3 = document.getElementById('story-p3-input');
+  const storyImgPrev = document.getElementById('story-img-preview');
+  const storyImgBtn = document.getElementById('upload-btn-story-img');
+
+  if (storyTitle) storyTitle.value = activeContent.foundersStory?.title || '';
+  if (storyImg) storyImg.value = activeContent.foundersStory?.foundersImage || '';
+  if (storyImgPrev && storyImg?.value) storyImgPrev.src = storyImg.value;
+  if (storyP1) storyP1.value = activeContent.foundersStory?.paragraphs?.[0] || '';
+  if (storyP2) storyP2.value = activeContent.foundersStory?.paragraphs?.[1] || '';
+  if (storyP3) storyP3.value = activeContent.foundersStory?.paragraphs?.[2] || '';
+
+  if (storyImg) {
+    storyImg.addEventListener('input', (e) => {
+      if (storyImgPrev) storyImgPrev.src = e.target.value.trim();
+    });
+  }
+  setupFileUploadButton(storyImgBtn, storyImg, storyImgPrev);
+
+  // Footer (Card 6)
+  const footerBrand = document.getElementById('footer-brand-input');
+  const footerLocs = document.getElementById('footer-locations-input');
+  const footerTagline = document.getElementById('footer-tagline-input');
+  const footerQTitle = document.getElementById('footer-quote-title-input');
+  const footerQDesc = document.getElementById('footer-quote-desc-input');
+  const footerInsta = document.getElementById('footer-instagram-input');
+  const footerYt = document.getElementById('footer-youtube-input');
+  const footerWa = document.getElementById('footer-whatsapp-input');
+
+  if (footerBrand) footerBrand.value = activeContent.footer?.brandName || '';
+  if (footerLocs) footerLocs.value = activeContent.footer?.locations || '';
+  if (footerTagline) footerTagline.value = activeContent.footer?.tagline || '';
+  if (footerQTitle) footerQTitle.value = activeContent.footer?.quoteTitle || '';
+  if (footerQDesc) footerQDesc.value = activeContent.footer?.quoteDesc || '';
+  if (footerInsta) footerInsta.value = activeContent.footer?.instagram || '';
+  if (footerYt) footerYt.value = activeContent.footer?.youtube || '';
+  if (footerWa) footerWa.value = activeContent.footer?.whatsapp || '';
+
   // Update Hero video preview sources
   const v1Prev = document.getElementById('hero-video-1-preview');
   const v2Prev = document.getElementById('hero-video-2-preview');
@@ -357,6 +420,12 @@ function populateAdminForms() {
     const prv = document.getElementById(`about-img-${i}-preview`);
     if (inp && prv && inp.value) prv.src = inp.value;
   }
+
+  // Wedding Films
+  renderFilmsManager();
+
+  // Portfolio
+  renderPortfolioManager();
 
   // Wedding Films
   renderFilmsManager();
@@ -785,6 +854,30 @@ function initSaveContent() {
           activeContent.portfolio[idx].exif.focal = box.querySelector('.port-focal')?.value || '50mm';
         }
       });
+
+      // Gather Founders Story (Card 5)
+      if (!activeContent.foundersStory) activeContent.foundersStory = {};
+      activeContent.foundersStory.title = document.getElementById('story-title-input')?.value || '';
+      activeContent.foundersStory.foundersImage = document.getElementById('story-img-input')?.value || '';
+      activeContent.foundersStory.paragraphs = [
+        document.getElementById('story-p1-input')?.value || '',
+        document.getElementById('story-p2-input')?.value || '',
+        document.getElementById('story-p3-input')?.value || ''
+      ];
+
+      // Gather Footer (Card 6)
+      if (!activeContent.footer) activeContent.footer = {};
+      activeContent.footer.brandName = document.getElementById('footer-brand-input')?.value || '';
+      activeContent.footer.locations = document.getElementById('footer-locations-input')?.value || '';
+      activeContent.footer.tagline = document.getElementById('footer-tagline-input')?.value || '';
+      activeContent.footer.quoteTitle = document.getElementById('footer-quote-title-input')?.value || '';
+      activeContent.footer.quoteDesc = document.getElementById('footer-quote-desc-input')?.value || '';
+      activeContent.footer.instagram = document.getElementById('footer-instagram-input')?.value || '';
+      activeContent.footer.youtube = document.getElementById('footer-youtube-input')?.value || '';
+      activeContent.footer.whatsapp = document.getElementById('footer-whatsapp-input')?.value || '';
+
+      // Save to local cache for instant local site reflection
+      localStorage.setItem('studio_content_cache', JSON.stringify(activeContent));
 
       // Save via API
       saveBtn.disabled = true;

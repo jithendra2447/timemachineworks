@@ -9,6 +9,18 @@ let activeHeroVideoIndex = 0;
 let dynamicPortfolioItems = [...PORTFOLIO_ITEMS];
 
 async function fetchDynamicSiteContent() {
+  // 1. Instantly apply cached content from localStorage if available
+  try {
+    const cached = localStorage.getItem('studio_content_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      applyDynamicContent(parsed);
+    }
+  } catch (e) {
+    console.warn('Local cache read error:', e);
+  }
+
+  // 2. Fetch latest content from MongoDB Atlas server
   try {
     const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:5000/api/content'
@@ -18,33 +30,146 @@ async function fetchDynamicSiteContent() {
     const data = await res.json();
 
     if (res.ok && data.success && data.data) {
-      const c = data.data;
-
-      // Update Hero Headline & Subtitle
-      if (c.hero?.headline) {
-        const headlineEl = document.querySelector('.hero-headline');
-        if (headlineEl) headlineEl.textContent = c.hero.headline;
-      }
-      if (c.hero?.subtitle) {
-        const subEl = document.querySelector('.subtitle-hero-text');
-        if (subEl) subEl.textContent = c.hero.subtitle;
-      }
-
-      // Update About Text
-      if (c.about?.title) {
-        const aboutTitleEl = document.querySelector('.feature-editorial-section .heading-section');
-        if (aboutTitleEl) aboutTitleEl.textContent = c.about.title;
-      }
-
-      // Update Portfolio Data
-      if (Array.isArray(c.portfolio) && c.portfolio.length) {
-        dynamicPortfolioItems = c.portfolio;
-        renderPortfolioGrid();
-      }
+      applyDynamicContent(data.data);
+      // Update local cache with server data
+      localStorage.setItem('studio_content_cache', JSON.stringify(data.data));
     }
   } catch (err) {
-    console.log('Using static portfolio defaults:', err);
+    console.log('Using static default site content:', err);
   }
+}
+
+function applyDynamicContent(c) {
+  if (!c) return;
+
+  // 1. Hero Headline, Subtitle & Background Video
+  if (c.hero?.headline) {
+    const headlineEl = document.querySelector('.hero-headline');
+    if (headlineEl) headlineEl.textContent = c.hero.headline;
+  }
+  if (c.hero?.subtitle) {
+    const subEl = document.querySelector('.subtitle-hero-text');
+    if (subEl) subEl.textContent = c.hero.subtitle;
+  }
+  if (c.hero?.videos?.[0]?.videoUrl) {
+    const heroVid = document.getElementById('hero-bg-video');
+    if (heroVid) {
+      const sourceEl = heroVid.querySelector('source');
+      if (sourceEl) {
+        if (sourceEl.src !== c.hero.videos[0].videoUrl) {
+          sourceEl.src = c.hero.videos[0].videoUrl;
+          heroVid.load();
+          heroVid.play().catch(() => {});
+        }
+      } else if (heroVid.src !== c.hero.videos[0].videoUrl) {
+        heroVid.src = c.hero.videos[0].videoUrl;
+        heroVid.load();
+        heroVid.play().catch(() => {});
+      }
+    }
+  }
+
+  // 2. About Story Section (#about)
+  if (c.about) {
+    const aboutTagEl = document.querySelector('#about .ui-tag');
+    const aboutTitleEl = document.querySelector('#about .heading-section');
+    const aboutParagraphs = document.querySelectorAll('#about .story-body-text p');
+    const aboutImgs = document.querySelectorAll('#about .editorial-image-collage img');
+
+    if (aboutTagEl && c.about.tag) aboutTagEl.textContent = c.about.tag;
+    if (aboutTitleEl && c.about.title) aboutTitleEl.textContent = c.about.title;
+    if (Array.isArray(c.about.paragraphs)) {
+      aboutParagraphs.forEach((p, i) => {
+        if (c.about.paragraphs[i]) p.textContent = c.about.paragraphs[i];
+      });
+    }
+    if (Array.isArray(c.about.collageImages)) {
+      aboutImgs.forEach((img, i) => {
+        if (c.about.collageImages[i]) img.src = c.about.collageImages[i];
+      });
+    }
+  }
+
+  // 3. Destination Wedding Films Carousel (#films-carousel)
+  if (Array.isArray(c.weddingFilms) && c.weddingFilms.length) {
+    renderDynamicWeddingFilms(c.weddingFilms);
+  }
+
+  // 4. Portfolio Gallery Grid (#works)
+  if (Array.isArray(c.portfolio) && c.portfolio.length) {
+    dynamicPortfolioItems = c.portfolio;
+    renderPortfolioGrid();
+  }
+
+  // 5. Founders & Celebration Story (#story)
+  if (c.foundersStory) {
+    const titleEl = document.querySelector('#story .story-title');
+    const storyPs = document.querySelectorAll('#story .story-body p');
+    const founderImg = document.querySelector('#story .story-founders-img');
+
+    if (titleEl && c.foundersStory.title) titleEl.innerHTML = c.foundersStory.title;
+    if (Array.isArray(c.foundersStory.paragraphs)) {
+      storyPs.forEach((p, i) => {
+        if (c.foundersStory.paragraphs[i]) p.textContent = c.foundersStory.paragraphs[i];
+      });
+    }
+    if (founderImg && c.foundersStory.foundersImage) founderImg.src = c.foundersStory.foundersImage;
+  }
+
+  // 6. Contact & Social Links Footer (#contact)
+  if (c.footer) {
+    const brandEl = document.querySelector('.footer-brand');
+    const taglineEl = document.querySelector('.footer-tagline');
+    const quoteTitleEl = document.querySelector('.footer-quote-title');
+    const quoteDescEl = document.querySelector('.footer-quote-desc');
+
+    if (brandEl && c.footer.brandName) brandEl.textContent = c.footer.brandName;
+    if (taglineEl && (c.footer.tagline || c.footer.locations)) {
+      taglineEl.innerHTML = `${c.footer.tagline || ''}<br>${c.footer.locations || ''}`;
+    }
+    if (quoteTitleEl && c.footer.quoteTitle) quoteTitleEl.textContent = c.footer.quoteTitle;
+    if (quoteDescEl && c.footer.quoteDesc) quoteDescEl.textContent = c.footer.quoteDesc;
+  }
+}
+
+function renderDynamicWeddingFilms(films) {
+  const track = document.querySelector('.films-track');
+  if (!track || !Array.isArray(films) || !films.length) return;
+
+  track.innerHTML = films.map((film, idx) => `
+    <div class="films-card-item" data-film-index="${idx}" data-video="${film.videoUrl || './videos/hero-wedding.mp4'}" data-title="${film.title || 'Wedding Film'}" data-sub="${film.location || ''}">
+      <div class="films-poster-card">
+        <img src="${film.poster || './images/niharika/main-shrine-couple.jpg'}" alt="${film.title}" class="films-poster-img" loading="lazy">
+        <div class="films-poster-overlay">
+          <div class="films-top-meta">
+            <span class="films-badge">${film.duration ? film.duration.toUpperCase() : '4K CINEMA'}</span>
+            <span class="films-watermark">A TIMEMACHINE FILM</span>
+          </div>
+          <div class="films-bottom-box">
+            <h3 class="films-poster-title">${film.title}</h3>
+            <div class="films-play-trigger">
+              <span class="play-icon-circle">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span class="play-text">WATCH FILM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="films-card-meta">
+        <span class="films-meta-location">${(film.location || 'DESTINATION FILM').toUpperCase()}</span>
+        <span class="films-meta-sub">${film.duration || 'Full HD Cinema'}</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Re-bind film card click listeners to launch Monograph Modal
+  track.querySelectorAll('.films-card-item').forEach((card, idx) => {
+    card.addEventListener('click', () => {
+      const film = films[idx];
+      if (film) openFilmStoryModal(film);
+    });
+  });
 }
 
 // Web Audio API Camera Shutter Click Synthesizer
