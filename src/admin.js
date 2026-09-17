@@ -567,6 +567,10 @@ let activeQuotation = {
   phone: '+91 97056 32982',
   email: 'bhavya.allu@wedding.com',
   website: 'timemachineworks.com',
+  mediaTheme: 'set1',
+  videoUrl: './videos/hero-wedding.mp4',
+  about1Url: '',
+  about2Url: '',
   events: [
     {
       id: 'evt-1',
@@ -634,6 +638,10 @@ function populateQuotationForm() {
   const advanceInput = document.getElementById('quote-advance-pct');
   const finalInput = document.getElementById('quote-final-pct');
   const hdNoteInput = document.getElementById('quote-hd-note');
+  const themeSelect = document.getElementById('quote-media-theme');
+  const videoInput = document.getElementById('quote-video-url');
+  const about1Input = document.getElementById('quote-about1-url');
+  const about2Input = document.getElementById('quote-about2-url');
 
   if (clientInput) clientInput.value = activeQuotation.clientName || '';
   if (coupleInput) coupleInput.value = activeQuotation.coupleNames || '';
@@ -643,6 +651,10 @@ function populateQuotationForm() {
   if (advanceInput) advanceInput.value = activeQuotation.advancePct || '';
   if (finalInput) finalInput.value = activeQuotation.finalPct || '';
   if (hdNoteInput) hdNoteInput.value = activeQuotation.hdNote || '';
+  if (themeSelect) themeSelect.value = activeQuotation.mediaTheme || 'set1';
+  if (videoInput) videoInput.value = activeQuotation.videoUrl || '';
+  if (about1Input) about1Input.value = activeQuotation.about1Url || '';
+  if (about2Input) about2Input.value = activeQuotation.about2Url || '';
 
   const tplSelect = document.getElementById('quote-template-select');
   if (tplSelect) tplSelect.value = activeQuotation.selectedTemplate || 'template1';
@@ -849,6 +861,10 @@ function bindQuotationEvents() {
   bindInput('quote-advance-pct', 'advancePct');
   bindInput('quote-final-pct', 'finalPct');
   bindInput('quote-hd-note', 'hdNote');
+  bindInput('quote-media-theme', 'mediaTheme');
+  bindInput('quote-video-url', 'videoUrl');
+  bindInput('quote-about1-url', 'about1Url');
+  bindInput('quote-about2-url', 'about2Url');
 
   const tplSelect = document.getElementById('quote-template-select');
   if (tplSelect) {
@@ -1359,33 +1375,33 @@ function renderProposalPreview() {
         </div>
 
         <!-- 3D CURVED ARC GALLERY SHOWCASE (Matching Image 1) -->
-        <div style="perspective: 1000px; display: flex; justify-content: center; align-items: center; gap: 0.6rem; margin: 2rem 0; padding: 1.5rem 0; overflow: hidden;">
+        <div style="perspective: 1000px; display: flex; justify-content: center; align-items: center; gap: 0.35rem; margin: 1.5rem 0; padding: 1rem 0; overflow: hidden; width: 100%; box-sizing: border-box;">
           <!-- Card -3 -->
-          <div style="width: 110px; height: 210px; border-radius: 16px; overflow: hidden; transform: rotateY(38deg) scale(0.78); opacity: 0.82; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.12);">
+          <div style="width: 80px; height: 160px; border-radius: 12px; overflow: hidden; transform: rotateY(34deg) scale(0.78); opacity: 0.82; flex-shrink: 0; box-shadow: 0 8px 16px rgba(0,0,0,0.12);">
             <img src="./images/niharika/groom-lighting.jpg" alt="Gallery 1" style="width:100%; height:100%; object-fit:cover;">
           </div>
           <!-- Card -2 -->
-          <div style="width: 120px; height: 235px; border-radius: 16px; overflow: hidden; transform: rotateY(25deg) scale(0.88); opacity: 0.92; flex-shrink: 0; box-shadow: 0 12px 25px rgba(0,0,0,0.14);">
+          <div style="width: 85px; height: 180px; border-radius: 12px; overflow: hidden; transform: rotateY(22deg) scale(0.88); opacity: 0.92; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.14);">
             <img src="./images/niharika/bridal-braid.jpg" alt="Gallery 2" style="width:100%; height:100%; object-fit:cover;">
           </div>
           <!-- Card -1 -->
-          <div style="width: 130px; height: 260px; border-radius: 16px; overflow: hidden; transform: rotateY(12deg) scale(0.96); flex-shrink: 0; box-shadow: 0 14px 30px rgba(0,0,0,0.16);">
+          <div style="width: 92px; height: 200px; border-radius: 12px; overflow: hidden; transform: rotateY(10deg) scale(0.96); flex-shrink: 0; box-shadow: 0 12px 24px rgba(0,0,0,0.16);">
             <img src="./images/niharika/lotus-portrait.jpg" alt="Gallery 3" style="width:100%; height:100%; object-fit:cover;">
           </div>
           <!-- Card 0 (Center) -->
-          <div style="width: 140px; height: 285px; border-radius: 16px; overflow: hidden; transform: rotateY(0deg) scale(1.06) translateZ(20px); flex-shrink: 0; z-index: 5; box-shadow: 0 20px 45px rgba(0,0,0,0.22); border: 2px solid rgba(197, 160, 89, 0.4);">
+          <div style="width: 105px; height: 220px; border-radius: 12px; overflow: hidden; transform: rotateY(0deg) scale(1.05) translateZ(15px); flex-shrink: 0; z-index: 5; box-shadow: 0 16px 35px rgba(0,0,0,0.22); border: 2px solid rgba(197, 160, 89, 0.4);">
             <img src="./images/niharika/main-shrine-couple.jpg" alt="Gallery 4" style="width:100%; height:100%; object-fit:cover;">
           </div>
           <!-- Card +1 -->
-          <div style="width: 130px; height: 260px; border-radius: 16px; overflow: hidden; transform: rotateY(-12deg) scale(0.96); flex-shrink: 0; box-shadow: 0 14px 30px rgba(0,0,0,0.16);">
+          <div style="width: 92px; height: 200px; border-radius: 12px; overflow: hidden; transform: rotateY(-10deg) scale(0.96); flex-shrink: 0; box-shadow: 0 12px 24px rgba(0,0,0,0.16);">
             <img src="./images/niharika/couple-doorway.jpg" alt="Gallery 5" style="width:100%; height:100%; object-fit:cover;">
           </div>
           <!-- Card +2 -->
-          <div style="width: 120px; height: 235px; border-radius: 16px; overflow: hidden; transform: rotateY(-25deg) scale(0.88); opacity: 0.92; flex-shrink: 0; box-shadow: 0 12px 25px rgba(0,0,0,0.14);">
+          <div style="width: 85px; height: 180px; border-radius: 12px; overflow: hidden; transform: rotateY(-22deg) scale(0.88); opacity: 0.92; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.14);">
             <img src="./images/niharika/pooja-lighting.jpg" alt="Gallery 6" style="width:100%; height:100%; object-fit:cover;">
           </div>
           <!-- Card +3 -->
-          <div style="width: 110px; height: 210px; border-radius: 16px; overflow: hidden; transform: rotateY(-38deg) scale(0.78); opacity: 0.82; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.12);">
+          <div style="width: 80px; height: 160px; border-radius: 12px; overflow: hidden; transform: rotateY(-34deg) scale(0.78); opacity: 0.82; flex-shrink: 0; box-shadow: 0 8px 16px rgba(0,0,0,0.12);">
             <img src="./images/niharika/mandapam-garland.jpg" alt="Gallery 7" style="width:100%; height:100%; object-fit:cover;">
           </div>
         </div>

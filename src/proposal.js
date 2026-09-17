@@ -152,6 +152,7 @@ function initUrlParams() {
 function initMediaCustomizer() {
   const customizerBtns = [document.getElementById('nav-btn-media-customizer'), document.getElementById('nav-btn-media-mobile')].filter(Boolean);
   const modal = document.getElementById('media-customizer-modal');
+  if (!modal && customizerBtns.length === 0) return;
   const closeBtn = document.getElementById('btn-close-media-customizer');
   const applyBtn = document.getElementById('btn-apply-media-customizer');
   const copyBtn = document.getElementById('btn-copy-media-link');
