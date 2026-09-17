@@ -1275,17 +1275,30 @@ function initQuoteModal() {
         submitBtn.disabled = true;
 
         try {
-          // Attempt POST to local Express server API
-          const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000/api/quote' : '/api/quote';
+          const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:5000/api/quote' 
+            : '/api/quote';
+            
           const res = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
+
           const data = await res.json();
-          console.log('✅ Quote API Response:', data);
+          if (res.ok && data.success) {
+            console.log('✅ Quote saved to MongoDB:', data);
+          } else {
+            console.error('❌ Quote API Error:', data.error || 'Failed to record quote.');
+            alert('Form submission warning: ' + (data.error || 'Server did not save to database.'));
+          }
         } catch (err) {
-          console.warn('⚠️ API dispatch warning (proceeding with local completion):', err.message);
+          console.error('❌ Network / API Server connection error:', err.message);
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            alert('Note: Local server (server.js on port 5000) is not running. Please start it using "npm run server" to save quotes locally.');
+          } else {
+            alert('Unable to connect to the backend server. Please verify MONGODB_URI is configured in Vercel settings.');
+          }
         } finally {
           submitBtn.textContent = originalText;
           submitBtn.disabled = false;
@@ -1295,6 +1308,7 @@ function initQuoteModal() {
         }
       });
     }
+
 
     if (backBtn) {
       backBtn.addEventListener('click', () => {

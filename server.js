@@ -49,17 +49,21 @@ let isMongoConnected = false;
 const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) {
     isMongoConnected = true;
-    return;
+    return true;
   }
+  const uri = process.env.MONGODB_URI || MONGODB_URI;
   try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 8000,
+      tlsAllowInvalidCertificates: true
     });
     isMongoConnected = true;
-    console.log('✅ Connected to MongoDB successfully');
+    console.log('✅ Connected to MongoDB Atlas successfully');
+    return true;
   } catch (err) {
     isMongoConnected = false;
-    console.warn('⚠️ MongoDB connection warning:', err.message);
+    console.error('❌ MongoDB connection failed:', err.message);
+    return false;
   }
 };
 
@@ -79,10 +83,12 @@ app.use(async (req, res, next) => {
 // ==========================================================================
 
 // Health Check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const connected = await connectDB();
   res.json({
     status: 'ok',
-    mongoConnected: isMongoConnected,
+    mongoConnected: connected,
+    mongooseState: mongoose.connection.readyState,
     googleSheetWebhookConfigured: !!GOOGLE_SHEET_WEBHOOK_URL,
     timestamp: new Date().toISOString()
   });
@@ -110,18 +116,15 @@ app.post('/api/quote', async (req, res) => {
       createdAt: new Date()
     };
 
-    let savedQuote = null;
-
-    if (isMongoConnected) {
-      const quoteDoc = new Quote(newQuoteData);
-      savedQuote = await quoteDoc.save();
-      console.log('💾 Quote saved to MongoDB with ID:', savedQuote._id);
-    } else {
-      newQuoteData._id = 'local_' + Date.now();
-      fallbackQuotesStore.push(newQuoteData);
-      savedQuote = newQuoteData;
-      console.log('💾 Quote saved to fallback local store with ID:', newQuoteData._id);
+    // Ensure database connection
+    const dbConnected = await connectDB();
+    if (!dbConnected) {
+      console.warn('⚠️ Primary MongoDB connection failed. Attempting direct save...');
     }
+
+    const quoteDoc = new Quote(newQuoteData);
+    const savedQuote = await quoteDoc.save();
+    console.log('💾 Quote saved successfully to MongoDB Atlas with ID:', savedQuote._id);
 
     // Google Sheets Webhook Dispatch (Async)
     if (GOOGLE_SHEET_WEBHOOK_URL) {
@@ -141,19 +144,20 @@ app.post('/api/quote', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Your quote request has been recorded successfully.',
+      message: 'Your quote request has been recorded successfully in MongoDB.',
       quoteId: savedQuote._id,
-      storedIn: isMongoConnected ? 'MongoDB' : 'FallbackStore'
+      storedIn: 'MongoDB Atlas'
     });
 
   } catch (err) {
     console.error('❌ Error processing /api/quote:', err);
     res.status(500).json({
       success: false,
-      error: 'Server error while processing your quote request.'
+      error: 'Server error while processing your quote request: ' + err.message
     });
   }
 });
+
 
 // GET /api/quotes - Retrieve List of Quotes (Admin / Studio Testing)
 app.get('/api/quotes', async (req, res) => {
