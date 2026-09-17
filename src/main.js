@@ -1231,6 +1231,52 @@ function initQuoteModal() {
     editingIndex = null;
   }
 
+  if (openAddEventBtn) {
+    openAddEventBtn.addEventListener('click', () => {
+      editingIndex = null;
+      if (addEventForm) addEventForm.reset();
+      openAddEventPopup();
+    });
+  }
+
+  if (closeAddEventBtn) closeAddEventBtn.addEventListener('click', closeAddEventPopup);
+  if (addEventBackdrop) addEventBackdrop.addEventListener('click', closeAddEventPopup);
+
+  if (addEventForm) {
+    addEventForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nameSelect = document.getElementById('event-name-select');
+      const dateInput = document.getElementById('event-date-input');
+      const timeSelect = document.getElementById('event-time-select');
+      const locationInput = document.getElementById('event-location-input');
+      const guestsInput = document.getElementById('event-guests-input');
+
+      if (!nameSelect || !dateInput) return;
+      if (!nameSelect.value || !dateInput.value) {
+        if (!nameSelect.value) nameSelect.reportValidity();
+        if (!dateInput.value) dateInput.reportValidity();
+        return;
+      }
+
+      const eventData = {
+        name: nameSelect.value,
+        date: dateInput.value,
+        time: timeSelect ? timeSelect.value : '',
+        location: locationInput ? locationInput.value : '',
+        guests: guestsInput ? guestsInput.value : ''
+      };
+
+      if (editingIndex !== null && editingIndex >= 0 && editingIndex < addedEvents.length) {
+        addedEvents[editingIndex] = eventData;
+      } else {
+        addedEvents.push(eventData);
+      }
+
+      renderAddedEvents();
+      closeAddEventPopup();
+    });
+  }
+
   // Clean form state on page load / refresh
   resetWizardForm();
   window.addEventListener('pageshow', () => {
