@@ -1170,7 +1170,11 @@ p, .paragraph-text {
   width: 100%;
   max-width: 760px;
   min-height: 480px;
-  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), var(--wizard-bg-image, url('/images/niharika/main-shrine-couple.jpg')) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
   border: 1px solid var(--color-border-light) !important;
   border-radius: 20px;
   padding: 3.5rem 3rem 2.5rem 3rem;
@@ -1179,7 +1183,7 @@ p, .paragraph-text {
   justify-content: space-between;
   box-shadow: 0 25px 70px rgba(26, 24, 22, 0.2);
   transform: translateY(25px) scale(0.97);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-image 0.4s ease-in-out;
   color: var(--color-heading) !important;
 }
 
@@ -1215,7 +1219,7 @@ p, .paragraph-text {
   flex-direction: column;
   justify-content: space-between;
   min-height: 340px;
-  background: #FFFFFF;
+  background: transparent !important;
   color: var(--color-heading);
   animation: wizardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

@@ -1070,7 +1070,7 @@ function initQuoteModal() {
   const modal = document.getElementById('quote-modal');
   const backdrop = document.getElementById('quote-modal-backdrop');
   const closeBtn = document.getElementById('quote-modal-close-btn');
-  const getQuoteBtn = document.getElementById('footer-get-quote-btn');
+  const wizardCard = document.querySelector('.wizard-card');
   const steps = Array.from(document.querySelectorAll('.wizard-step'));
   let currentStep = 0;
   let addedEvents = [];
@@ -1082,7 +1082,38 @@ function initQuoteModal() {
   const addEventForm = document.getElementById('add-event-form');
   const addedEventsListEl = document.getElementById('added-events-list');
 
+  const STEP_BACKGROUNDS = {
+    0: "url('/images/niharika/main-shrine-couple.jpg')",
+    1: "url('/images/niharika/doorway-portrait.jpg')",
+    2: "url('/images/niharika/groom-lighting.jpg')",
+    3: "url('/images/niharika/lotus-portrait.jpg')",
+    4: "url('/images/niharika/pooja-kalasham.jpg')",
+    5: "url('/images/niharika/mandapam-garland.jpg')",
+    "success": "url('/images/niharika/pooja-prayer.jpg')"
+  };
+
+  const resetWizardForm = () => {
+    steps.forEach(step => {
+      const inputs = step.querySelectorAll('input, select');
+      inputs.forEach(inp => {
+        if (inp.tagName.toLowerCase() === 'select') {
+          inp.selectedIndex = 0;
+        } else {
+          inp.value = '';
+        }
+      });
+    });
+    addedEvents = [];
+    if (typeof renderAddedEvents === 'function') {
+      renderAddedEvents();
+    }
+    if (addEventForm) {
+      addEventForm.reset();
+    }
+  };
+
   const openModal = () => {
+    resetWizardForm();
     if (modal) modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     goToStep(0);
@@ -1091,11 +1122,26 @@ function initQuoteModal() {
   const closeModal = () => {
     if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
+    resetWizardForm();
   };
 
   const goToStep = (stepIndex) => {
-    if (stepIndex < 0 || stepIndex >= steps.length) return;
-    currentStep = stepIndex;
+    if (typeof stepIndex === 'number') {
+      if (stepIndex < 0 || stepIndex >= steps.length) return;
+      currentStep = stepIndex;
+    }
+
+    let bgKey = currentStep;
+    const targetStepEl = steps[currentStep];
+    if (targetStepEl) {
+      const stepAttr = targetStepEl.getAttribute('data-step');
+      if (stepAttr === 'success') bgKey = 'success';
+    }
+
+    if (wizardCard && STEP_BACKGROUNDS[bgKey]) {
+      wizardCard.style.setProperty('--wizard-bg-image', STEP_BACKGROUNDS[bgKey]);
+    }
+
     steps.forEach((step, idx) => {
       if (idx === currentStep) {
         step.classList.add('active');
@@ -1106,6 +1152,12 @@ function initQuoteModal() {
       }
     });
   };
+
+  // Clean form state on page load / refresh
+  resetWizardForm();
+  window.addEventListener('pageshow', () => {
+    resetWizardForm();
+  });
 
   let editingIndex = null;
   const tableWrapperEl = document.getElementById('added-events-table-wrapper');
@@ -1309,7 +1361,6 @@ function initQuoteModal() {
       });
     }
 
-
     if (backBtn) {
       backBtn.addEventListener('click', () => {
         goToStep(idx - 1);
@@ -1341,12 +1392,7 @@ function initQuoteModal() {
   const startOverBtn = document.getElementById('wizard-start-over-btn');
   if (startOverBtn) {
     startOverBtn.addEventListener('click', () => {
-      steps.forEach(step => {
-        const input = step.querySelector('input');
-        if (input) input.value = '';
-      });
-      addedEvents = [];
-      renderAddedEvents();
+      resetWizardForm();
       goToStep(0);
     });
   }
