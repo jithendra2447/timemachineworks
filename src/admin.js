@@ -448,8 +448,10 @@ function initAdminTabs() {
 }
 
 // ==========================================================================
-// 3. LEADS & QUOTES LOAD
+// 3. LEADS & QUOTES LOAD + 1-CLICK QUOTATION
 // ==========================================================================
+let fetchedLeadsCache = [];
+
 async function loadLeads() {
   const tbody = document.getElementById('leads-table-body');
   const badge = document.getElementById('leads-count-badge');
@@ -465,12 +467,13 @@ async function loadLeads() {
 
     if (res.ok && data.success && Array.isArray(data.data)) {
       const quotes = data.data;
+      fetchedLeadsCache = quotes;
       if (badge) badge.textContent = quotes.length;
 
       if (quotes.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--color-body-muted);">
+            <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--color-body-muted);">
               No quote requests submitted yet.
             </td>
           </tr>
@@ -478,37 +481,833 @@ async function loadLeads() {
         return;
       }
 
-      tbody.innerHTML = quotes.map(q => {
+      tbody.innerHTML = quotes.map((q, idx) => {
         const dateStr = q.createdAt ? new Date(q.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
         const eventsList = (q.events || []).map(e => `
           <div style="font-size: 0.82rem; margin-bottom: 0.35rem; border-left: 2px solid var(--color-sage-border); padding-left: 0.5rem;">
-            <strong>${e.name}</strong> • ${e.date || '-'} • ${e.time || '-'} • ${e.location || 'Location tbd'} (${e.guests || '-'} guests)
+            <strong>${e.name}</strong> • ${e.date || '-'} • ${e.location || 'Location tbd'} (${e.guests || '-'} guests)
           </div>
         `).join('');
 
         return `
           <tr>
             <td style="font-weight: 500; font-family: var(--font-ui); font-size: 0.8rem;">${dateStr}</td>
-            <td style="font-weight: 600; color: var(--color-heading);">${q.clientName}</td>
-            <td><strong>Groom:</strong> ${q.groomName}<br><strong>Bride:</strong> ${q.brideName}</td>
-            <td><a href="tel:${q.countryCode}${q.phone}" style="color: var(--color-heading); text-decoration: underline;">${q.countryCode} ${q.phone}</a></td>
+            <td style="font-weight: 600; color: var(--color-heading);">${q.clientName || 'Client'}</td>
+            <td><strong>Groom:</strong> ${q.groomName || '-'}<br><strong>Bride:</strong> ${q.brideName || '-'}</td>
+            <td><a href="tel:${q.countryCode || ''}${q.phone || ''}" style="color: var(--color-heading); text-decoration: underline;">${q.countryCode || ''} ${q.phone || ''}</a></td>
             <td>${eventsList || 'No events listed'}</td>
+            <td>
+              <button type="button" class="btn-create-quote-from-lead" data-lead-idx="${idx}" style="background: #C5A059; color: #FFFFFF; border: none; padding: 0.45rem 0.75rem; border-radius: 6px; font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem;">
+                ⚡ Create Quotation
+              </button>
+            </td>
           </tr>
         `;
       }).join('');
+
+      // Wire up 1-Click Create Quotation buttons
+      tbody.querySelectorAll('.btn-create-quote-from-lead').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-lead-idx'), 10);
+          const lead = fetchedLeadsCache[idx];
+          if (!lead) return;
+
+          activeQuotation.clientName = lead.clientName || 'Client';
+          activeQuotation.coupleNames = `Groom: ${lead.groomName || '-'} • Bride: ${lead.brideName || '-'}`;
+          activeQuotation.phone = `${lead.countryCode || ''} ${lead.phone || ''}`.trim();
+          if (lead.email) activeQuotation.email = lead.email;
+
+          if (Array.isArray(lead.events) && lead.events.length > 0) {
+            activeQuotation.events = lead.events.map((e, i) => ({
+              id: 'evt-' + Date.now() + '-' + i,
+              name: e.name || `Event #${i+1}`,
+              date: e.date || 'TBD Date',
+              location: e.location || 'TBD Location',
+              candidPhoto: 1,
+              candidVideo: 1,
+              tradPhoto: 1,
+              tradVideo: 1,
+              dronePilot: 0
+            }));
+          }
+
+          populateQuotationForm();
+          renderQuoteEventsForm();
+          renderProposalPreview();
+
+          // Switch tab to tab-quotation
+          const quoteTabBtn = document.querySelector('.admin-tab-btn[data-tab="tab-quotation"]');
+          if (quoteTabBtn) quoteTabBtn.click();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          showToast(`Quotation auto-populated for ${lead.clientName}!`);
+        });
+      });
     }
   } catch (err) {
     console.warn('Unable to fetch quotes from server:', err);
     if (tbody) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--color-body-muted);">
+          <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--color-body-muted);">
             Local server on port 5000 is not running. Please start server via "npm run server" to view live leads.
           </td>
         </tr>
       `;
     }
   }
+}
+
+// ==========================================================================
+// QUOTATION GENERATOR & LUXURY PROPOSAL BUILDER LOGIC
+// ==========================================================================
+let activeQuotation = {
+  clientName: 'Niharika & Anish',
+  coupleNames: 'Groom: Anish • Bride: Niharika',
+  phone: '+91 9876543210',
+  email: 'niharika.anish@wedding.com',
+  events: [
+    {
+      id: 'evt-1',
+      name: 'Lakshmi Devi Vratham & Engagement',
+      date: '12 Nov 2026',
+      location: 'Sacred Kalasham Mandapam, Hyderabad',
+      candidPhoto: 1,
+      candidVideo: 1,
+      tradPhoto: 1,
+      tradVideo: 1,
+      dronePilot: 0
+    },
+    {
+      id: 'evt-2',
+      name: 'Sangeeth & Haldi Celebration',
+      date: '13 Nov 2026',
+      location: 'Novotel Convention Centre, Hyderabad',
+      candidPhoto: 2,
+      candidVideo: 2,
+      tradPhoto: 1,
+      tradVideo: 1,
+      dronePilot: 1
+    },
+    {
+      id: 'evt-3',
+      name: 'Grand Wedding & Royal Reception',
+      date: '14 Nov 2026',
+      location: 'Grand Palace Hall, Hyderabad',
+      candidPhoto: 2,
+      candidVideo: 2,
+      tradPhoto: 2,
+      tradVideo: 2,
+      dronePilot: 1
+    }
+  ],
+  services: {
+    pictures: true,
+    films: true,
+    albums: true,
+    videos: true
+  },
+  totalPrice: '2,50,000',
+  advancePct: '50% Advance Upon Booking Confirmation',
+  finalPct: '50% Balance Prior to First Event Date',
+  hdNote: 'Client is required to provide two 4TB high-speed USB-C External Hard Drives for raw footage & master video delivery.'
+};
+
+function initQuotationGenerator() {
+  try {
+    const saved = localStorage.getItem('studio_active_quotation');
+    if (saved) {
+      activeQuotation = JSON.parse(saved);
+    }
+  } catch (e) {}
+
+  populateQuotationForm();
+  renderQuoteEventsForm();
+  renderProposalPreview();
+  bindQuotationEvents();
+}
+
+function populateQuotationForm() {
+  const clientInput = document.getElementById('quote-client-name');
+  const coupleInput = document.getElementById('quote-couple-names');
+  const phoneInput = document.getElementById('quote-client-phone');
+  const emailInput = document.getElementById('quote-client-email');
+  const priceInput = document.getElementById('quote-total-price');
+  const advanceInput = document.getElementById('quote-advance-pct');
+  const finalInput = document.getElementById('quote-final-pct');
+  const hdNoteInput = document.getElementById('quote-hd-note');
+
+  if (clientInput) clientInput.value = activeQuotation.clientName || '';
+  if (coupleInput) coupleInput.value = activeQuotation.coupleNames || '';
+  if (phoneInput) phoneInput.value = activeQuotation.phone || '';
+  if (emailInput) emailInput.value = activeQuotation.email || '';
+  if (priceInput) priceInput.value = activeQuotation.totalPrice || '';
+  if (advanceInput) advanceInput.value = activeQuotation.advancePct || '';
+  if (finalInput) finalInput.value = activeQuotation.finalPct || '';
+  if (hdNoteInput) hdNoteInput.value = activeQuotation.hdNote || '';
+
+  const svcPic = document.getElementById('svc-pictures-check');
+  const svcFilm = document.getElementById('svc-films-check');
+  const svcAlbum = document.getElementById('svc-albums-check');
+  const svcVid = document.getElementById('svc-videos-check');
+
+  if (svcPic) svcPic.checked = activeQuotation.services.pictures;
+  if (svcFilm) svcFilm.checked = activeQuotation.services.films;
+  if (svcAlbum) svcAlbum.checked = activeQuotation.services.albums;
+  if (svcVid) svcVid.checked = activeQuotation.services.videos;
+}
+
+function renderQuoteEventsForm() {
+  const container = document.getElementById('quote-events-list');
+  if (!container) return;
+
+  if (activeQuotation.events.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: var(--color-body-muted); background: #FAF8F5; border-radius: 8px;">
+        No events added yet. Click "+ Add Event" to configure celebration coverage.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = activeQuotation.events.map((evt, idx) => `
+    <div class="event-item-card" data-evt-id="${evt.id}">
+      <div class="event-item-header">
+        <span style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: #C5A059; text-transform: uppercase; letter-spacing: 0.1em;">
+          EVENT #${idx + 1}
+        </span>
+        <button type="button" class="btn-remove-evt" data-evt-id="${evt.id}" style="background: none; border: none; color: #D9534F; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.3rem;">
+          ✕ Remove Event
+        </button>
+      </div>
+
+      <div class="admin-form-grid">
+        <div class="admin-form-group col-full">
+          <label class="admin-label">Event Name / Title</label>
+          <input type="text" class="admin-input evt-input-name" data-evt-id="${evt.id}" value="${evt.name || ''}" placeholder="e.g. Engagement, Sangeeth, Wedding, Haldi">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-label">Event Date</label>
+          <input type="text" class="admin-input evt-input-date" data-evt-id="${evt.id}" value="${evt.date || ''}" placeholder="e.g. 12 Nov 2026">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-label">Venue Location</label>
+          <input type="text" class="admin-input evt-input-loc" data-evt-id="${evt.id}" value="${evt.location || ''}" placeholder="e.g. Hyderabad, Telangana">
+        </div>
+
+        <div class="admin-form-group col-full" style="background: #FFFFFF; padding: 1rem; border-radius: 6px; border: 1px solid var(--color-border-light); margin-top: 0.5rem;">
+          <label class="admin-label" style="margin-bottom: 0.75rem; display: block;">Crew Breakdown & Staffing</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            
+            <div>
+              <span style="font-size: 0.8rem; color: var(--color-body); font-weight: 500;">Candid Photographers</span>
+              <div class="crew-counter-group" style="margin-top: 0.35rem;">
+                <button type="button" class="crew-btn btn-crew-minus" data-evt-id="${evt.id}" data-field="candidPhoto">-</button>
+                <span style="font-weight: 700; font-size: 0.9rem; width: 24px; text-align: center;">${evt.candidPhoto || 0}</span>
+                <button type="button" class="crew-btn btn-crew-plus" data-evt-id="${evt.id}" data-field="candidPhoto">+</button>
+              </div>
+            </div>
+
+            <div>
+              <span style="font-size: 0.8rem; color: var(--color-body); font-weight: 500;">Candid Videographers</span>
+              <div class="crew-counter-group" style="margin-top: 0.35rem;">
+                <button type="button" class="crew-btn btn-crew-minus" data-evt-id="${evt.id}" data-field="candidVideo">-</button>
+                <span style="font-weight: 700; font-size: 0.9rem; width: 24px; text-align: center;">${evt.candidVideo || 0}</span>
+                <button type="button" class="crew-btn btn-crew-plus" data-evt-id="${evt.id}" data-field="candidVideo">+</button>
+              </div>
+            </div>
+
+            <div>
+              <span style="font-size: 0.8rem; color: var(--color-body); font-weight: 500;">Traditional Photographers</span>
+              <div class="crew-counter-group" style="margin-top: 0.35rem;">
+                <button type="button" class="crew-btn btn-crew-minus" data-evt-id="${evt.id}" data-field="tradPhoto">-</button>
+                <span style="font-weight: 700; font-size: 0.9rem; width: 24px; text-align: center;">${evt.tradPhoto || 0}</span>
+                <button type="button" class="crew-btn btn-crew-plus" data-evt-id="${evt.id}" data-field="tradPhoto">+</button>
+              </div>
+            </div>
+
+            <div>
+              <span style="font-size: 0.8rem; color: var(--color-body); font-weight: 500;">Traditional Videographers</span>
+              <div class="crew-counter-group" style="margin-top: 0.35rem;">
+                <button type="button" class="crew-btn btn-crew-minus" data-evt-id="${evt.id}" data-field="tradVideo">-</button>
+                <span style="font-weight: 700; font-size: 0.9rem; width: 24px; text-align: center;">${evt.tradVideo || 0}</span>
+                <button type="button" class="crew-btn btn-crew-plus" data-evt-id="${evt.id}" data-field="tradVideo">+</button>
+              </div>
+            </div>
+
+            <div>
+              <span style="font-size: 0.8rem; color: var(--color-body); font-weight: 500;">Drone Cinematographer</span>
+              <div class="crew-counter-group" style="margin-top: 0.35rem;">
+                <button type="button" class="crew-btn btn-crew-minus" data-evt-id="${evt.id}" data-field="dronePilot">-</button>
+                <span style="font-weight: 700; font-size: 0.9rem; width: 24px; text-align: center;">${evt.dronePilot || 0}</span>
+                <button type="button" class="crew-btn btn-crew-plus" data-evt-id="${evt.id}" data-field="dronePilot">+</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.btn-remove-evt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-evt-id');
+      activeQuotation.events = activeQuotation.events.filter(e => e.id !== id);
+      renderQuoteEventsForm();
+      renderProposalPreview();
+    });
+  });
+
+  container.querySelectorAll('.evt-input-name').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const id = e.target.getAttribute('data-evt-id');
+      const item = activeQuotation.events.find(x => x.id === id);
+      if (item) { item.name = e.target.value; renderProposalPreview(); }
+    });
+  });
+
+  container.querySelectorAll('.evt-input-date').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const id = e.target.getAttribute('data-evt-id');
+      const item = activeQuotation.events.find(x => x.id === id);
+      if (item) { item.date = e.target.value; renderProposalPreview(); }
+    });
+  });
+
+  container.querySelectorAll('.evt-input-loc').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const id = e.target.getAttribute('data-evt-id');
+      const item = activeQuotation.events.find(x => x.id === id);
+      if (item) { item.location = e.target.value; renderProposalPreview(); }
+    });
+  });
+
+  container.querySelectorAll('.btn-crew-minus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-evt-id');
+      const field = btn.getAttribute('data-field');
+      const item = activeQuotation.events.find(x => x.id === id);
+      if (item && item[field] > 0) {
+        item[field]--;
+        renderQuoteEventsForm();
+        renderProposalPreview();
+      }
+    });
+  });
+
+  container.querySelectorAll('.btn-crew-plus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-evt-id');
+      const field = btn.getAttribute('data-field');
+      const item = activeQuotation.events.find(x => x.id === id);
+      if (item) {
+        item[field] = (item[field] || 0) + 1;
+        renderQuoteEventsForm();
+        renderProposalPreview();
+      }
+    });
+  });
+}
+
+function bindQuotationEvents() {
+  const bindInput = (id, key, subKey) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const handler = (e) => {
+      const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      if (subKey) {
+        activeQuotation[key][subKey] = val;
+      } else {
+        activeQuotation[key] = val;
+      }
+      renderProposalPreview();
+    };
+    el.addEventListener('input', handler);
+    if (el.type === 'checkbox') el.addEventListener('change', handler);
+  };
+
+  bindInput('quote-client-name', 'clientName');
+  bindInput('quote-couple-names', 'coupleNames');
+  bindInput('quote-client-phone', 'phone');
+  bindInput('quote-client-email', 'email');
+  bindInput('quote-total-price', 'totalPrice');
+  bindInput('quote-advance-pct', 'advancePct');
+  bindInput('quote-final-pct', 'finalPct');
+  bindInput('quote-hd-note', 'hdNote');
+
+  bindInput('svc-pictures-check', 'services', 'pictures');
+  bindInput('svc-films-check', 'services', 'films');
+  bindInput('svc-albums-check', 'services', 'albums');
+  bindInput('svc-videos-check', 'services', 'videos');
+
+  const addEvtBtn = document.getElementById('btn-add-quote-event');
+  if (addEvtBtn) {
+    addEvtBtn.addEventListener('click', () => {
+      activeQuotation.events.push({
+        id: 'evt-' + Date.now(),
+        name: 'Celebration Event',
+        date: 'TBD Date',
+        location: 'TBD Location',
+        candidPhoto: 1,
+        candidVideo: 1,
+        tradPhoto: 1,
+        tradVideo: 1,
+        dronePilot: 0
+      });
+      renderQuoteEventsForm();
+      renderProposalPreview();
+    });
+  }
+
+  const printBtn = document.getElementById('btn-print-proposal');
+  if (printBtn) {
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  const waBtn = document.getElementById('btn-send-whatsapp');
+  if (waBtn) {
+    waBtn.addEventListener('click', () => {
+      const cleanPhone = (activeQuotation.phone || '').replace(/[^0-9]/g, '');
+      const evtNames = activeQuotation.events.map(e => e.name).join(', ');
+      const msg = `Dear ${activeQuotation.clientName || 'Client'},\n\nGreetings from Timemachine & Co! ✨\n\nWe have prepared a fine-art luxury wedding quotation proposal tailored for your celebrations.\n\nSummary:\n• Couple: ${activeQuotation.coupleNames || '-'}\n• Events: ${evtNames || '-'}\n• Final Quote Price: ₹ ${activeQuotation.totalPrice || '0'}\n\nPlease review your custom proposal. We look forward to capturing your timeless story!\n\nWarm regards,\nTimemachine & Co`;
+      
+      const waUrl = cleanPhone
+        ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
+        : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, '_blank');
+    });
+  }
+
+  const copyTextBtn = document.getElementById('btn-copy-quote-text');
+  if (copyTextBtn) {
+    copyTextBtn.addEventListener('click', () => {
+      const summaryText = `TIMEMACHINE & CO — LUXURY WEDDING PROPOSAL\n--------------------------------------------\nClient: ${activeQuotation.clientName}\nCouple: ${activeQuotation.coupleNames}\nPhone: ${activeQuotation.phone}\nEmail: ${activeQuotation.email}\n\nEVENTS COVERAGE:\n` +
+        activeQuotation.events.map(e => `- ${e.name} (${e.date}, ${e.location})\n  Crew: ${e.candidPhoto} Candid Photo, ${e.candidVideo} Candid Video, ${e.tradPhoto} Trad Photo, ${e.tradVideo} Trad Video${e.dronePilot ? `, ${e.dronePilot} Drone` : ''}`).join('\n') +
+        `\n\nSERVICES OFFERED:\n` +
+        (activeQuotation.services.pictures ? `• High-Resolution Color-Graded Stills\n` : '') +
+        (activeQuotation.services.films ? `• 4K Cinematic Teaser & Feature Film\n` : '') +
+        (activeQuotation.services.albums ? `• Handcrafted Printed Fine-Art Albums\n` : '') +
+        (activeQuotation.services.videos ? `• Full Length Traditional Video Coverage\n` : '') +
+        `\nFINAL QUOTE PRICE: ₹ ${activeQuotation.totalPrice}\n\nPAYMENT TIMELINE:\n• ${activeQuotation.advancePct}\n• ${activeQuotation.finalPct}\n• Note: ${activeQuotation.hdNote}`;
+
+      navigator.clipboard.writeText(summaryText);
+      showToast('Quotation summary copied to clipboard!');
+    });
+  }
+
+  const saveDraftBtn = document.getElementById('btn-save-quote-draft');
+  if (saveDraftBtn) {
+    saveDraftBtn.addEventListener('click', () => {
+      try {
+        localStorage.setItem('studio_active_quotation', JSON.stringify(activeQuotation));
+        showToast('Proposal draft saved to browser storage!');
+      } catch (e) {
+        showToast('Error saving draft');
+      }
+    });
+  }
+}
+
+function renderProposalPreview() {
+  const container = document.getElementById('proposal-template-preview');
+  if (!container) return;
+
+  const datesSummary = activeQuotation.events.map(e => e.date).filter(Boolean).join(' • ') || 'Upcoming Wedding Dates';
+
+  const eventsHtml = activeQuotation.events.map(e => {
+    const crewLines = [];
+    if (e.candidPhoto) crewLines.push(`${e.candidPhoto} Candid Photographer`);
+    if (e.candidVideo) crewLines.push(`${e.candidVideo} Candid Videographer`);
+    if (e.tradPhoto) crewLines.push(`${e.tradPhoto} Traditional Photographer`);
+    if (e.tradVideo) crewLines.push(`${e.tradVideo} Traditional Videographer`);
+    if (e.dronePilot) crewLines.push(`${e.dronePilot} Drone Pilot`);
+
+    return `
+      <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+        <div style="font-size: 0.82rem; color: #55524E; font-family: var(--font-paragraph); margin-bottom: 0.35rem;">
+          ${e.date || 'TBD Date'} | ${e.location || 'Location'}
+        </div>
+        <h4 style="font-family: var(--font-heading); font-size: 1.35rem; color: #1A1816; margin: 0 0 0.85rem 0; font-weight: 600;">
+          ${e.name || 'Event Title'}
+        </h4>
+        <div style="font-size: 0.88rem; color: #2C2622; line-height: 1.6;">
+          ${crewLines.map(c => `<div>${c}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const svcs = activeQuotation.services;
+
+  container.innerHTML = `
+    <!-- PAGE 1: COVER PAGE (Matching Image 1) -->
+    <div class="proposal-section-page" style="position: relative; background: #FBF9F5; min-height: 720px; padding: 2.5rem; border-radius: 12px; overflow: hidden; margin-bottom: 3.5rem;">
+      <!-- Top Right TM&CO Logo Box -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <!-- Top Left Branch Art SVG -->
+        <svg width="140" height="100" viewBox="0 0 140 100" fill="none" stroke="#C5A059" stroke-width="1.2">
+          <path d="M0 0 C40 20, 80 10, 120 40 M30 15 C50 5, 70 25, 90 20 M60 30 C80 20, 100 35, 130 30"></path>
+          <circle cx="90" cy="20" r="3" fill="#C5A059"></circle>
+          <circle cx="120" cy="40" r="3" fill="#C5A059"></circle>
+        </svg>
+
+        <div style="border: 2px solid #C5A059; padding: 0.5rem 1rem; text-align: center;">
+          <div style="font-family: var(--font-heading); font-size: 1.2rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1;">TM</div>
+          <div style="font-family: var(--font-heading); font-size: 0.95rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1; margin-top: 0.2rem;">&CO</div>
+        </div>
+      </div>
+
+      <!-- Center Client Name Greeting -->
+      <div style="text-align: center; margin: 4rem 0 2rem 0;">
+        <h2 style="font-family: var(--font-heading); font-size: 2.2rem; color: #C5A059; font-weight: 400; font-style: italic;">
+          ${activeQuotation.clientName || 'Name'}
+        </h2>
+      </div>
+
+      <!-- Center Butterfly Graphic Art -->
+      <div style="text-align: right; padding-right: 2rem; margin-bottom: 3rem;">
+        <svg width="120" height="160" viewBox="0 0 120 160" fill="none" stroke="#C5A059" stroke-width="1.2">
+          <path d="M60 40 C30 10, 10 30, 40 70 C10 90, 40 120, 60 100 C80 120, 110 90, 80 70 C110 30, 90 10, 60 40 Z"></path>
+          <path d="M60 100 C40 120, 30 140, 60 150 C90 140, 80 120, 60 100 Z"></path>
+        </svg>
+      </div>
+
+      <!-- Banner Tagline -->
+      <div style="margin-top: 2rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 1.45rem; letter-spacing: 0.14em; text-transform: uppercase; color: #C5A059; font-weight: 400; margin: 0;">
+          BECAUSE EVERY <span style="font-size: 1.8rem; letter-spacing: 0.08em;">FRAME</span>
+        </h3>
+        <h3 style="font-family: var(--font-heading); font-size: 1.45rem; letter-spacing: 0.14em; text-transform: uppercase; color: #C5A059; font-weight: 400; margin: 0.2rem 0 0 0;">
+          HAS A <span style="font-size: 1.8rem; letter-spacing: 0.08em;">STORY</span> TO TELL
+        </h3>
+      </div>
+
+      <div style="margin-top: 3.5rem; border-top: 1px solid rgba(197, 160, 89, 0.25); padding-top: 1.5rem;">
+        <h4 style="font-family: var(--font-heading); font-size: 1.25rem; color: #C5A059; font-weight: 600; margin: 0 0 0.4rem 0;">
+          Dear ${activeQuotation.clientName || 'Name'}
+        </h4>
+        <p style="font-size: 0.92rem; color: #2C2622; line-height: 1.65; margin: 0;">
+          We appreciate the opportunity to be a part of your special day and capture the timeless moments that will make your wedding a cherished memory.
+        </p>
+      </div>
+    </div>
+
+    <!-- PAGE 2: ABOUT US (Matching Image 2) -->
+    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
+      <div style="position: relative; border-radius: 12px; overflow: hidden; height: 260px; margin-bottom: 2.5rem; background: #1A1816;">
+        <img src="./images/niharika/main-shrine-couple.jpg" alt="Showcase Banner" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.55; filter: grayscale(100%);">
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #FFFFFF; padding: 1.5rem;">
+          <div style="border: 1.5px solid #C5A059; padding: 0.25rem 0.6rem; color: #C5A059; font-family: var(--font-heading); font-size: 0.75rem; letter-spacing: 0.15em; margin-bottom: 0.5rem;">TM & CO</div>
+          <h2 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; letter-spacing: 0.18em; margin: 0; text-transform: uppercase;">
+            TIMEMACHINE & CO
+          </h2>
+          <span style="font-family: var(--font-ui); font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: #E5C98D; margin-top: 0.3rem;">PRESENTS</span>
+        </div>
+      </div>
+
+      <div class="proposal-divider-star">— ✦ —</div>
+
+      <div style="text-align: center; max-width: 680px; margin: 1.5rem auto;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1rem 0; font-weight: 600;">About Us</h2>
+        <p style="font-size: 0.95rem; color: #2C2622; line-height: 1.75; margin: 0;">
+          At Timemachine & Co, we freeze fleeting moments to make your forever love story a timeless masterpiece, weaving the magic of your wedding into a tapestry of emotions, traditions, and heirlooms. Embark on your journey with us, and create a visual legacy treasured for generations to come.
+        </p>
+      </div>
+
+      <div class="proposal-divider-star">— ✦ —</div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
+        <div style="height: 280px; border-radius: 10px; overflow: hidden; border: 1px solid #EAE3D2;">
+          <img src="./images/niharika/bridal-braid.jpg" alt="Gallery Portrait" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="height: 132px; border-radius: 10px; overflow: hidden; border: 1px solid #EAE3D2;">
+            <img src="./images/niharika/lotus-portrait.jpg" alt="Gallery 2" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="height: 132px; border-radius: 10px; overflow: hidden; border: 1px solid #EAE3D2;">
+            <img src="./images/niharika/pooja-lighting.jpg" alt="Gallery 3" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 3: YOUR EVENTS (Matching Image 3) -->
+    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 600;">Your Events</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+        ${eventsHtml || '<p style="text-align:center;">No events configured.</p>'}
+      </div>
+    </div>
+
+    <!-- PAGE 4: SERVICES OFFERED (Matching Image 4) -->
+    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 600;">Services Offered</h2>
+
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        ${svcs.pictures ? `
+          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Edited Pictures</h4>
+            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0;">
+              You shall receive 1,000 fully edited images from all events, portraying your wedding story, delivered on the cloud within 60 days from payment clearance.
+            </p>
+          </div>
+        ` : ''}
+
+        ${svcs.films ? `
+          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Cinematic Wedding Films</h4>
+            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0 0 0.8rem 0;">
+              1 cinematic HD film with the best footage from your events, edited according to our style, to be delivered on cloud within 60 days from payment clearance. You can suggest any number of changes but all at once and within a week of delivery.
+            </p>
+            <div style="font-size: 0.85rem; color: #55524E; font-style: italic;">
+              *Changes will be accepted only once from 2nd time Rs 15,000 will be charged extra.
+            </div>
+          </div>
+        ` : ''}
+
+        ${svcs.albums ? `
+          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Printed Albums</h4>
+            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0;">
+              You shall receive 3 Printed albums from the best events each album has 40 sheets. An extra sheet will incur an additional charge of ₹600 per sheet.
+            </p>
+          </div>
+        ` : ''}
+
+        ${svcs.videos ? `
+          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Traditional Videos</h4>
+            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0;">
+              You shall receive 5 long traditional video of all events in documentary style, delivered within 75 days from payment clearance.
+            </p>
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
+
+      <!-- Quote Price Callout Box -->
+      <div style="text-align: center; padding: 2rem 1rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 1.65rem; color: #C5A059; margin: 0 0 0.5rem 0; font-weight: 600;">
+          Dear ${activeQuotation.clientName || 'Name'}
+        </h3>
+        <p style="font-size: 0.95rem; color: #2C2622; margin: 0 0 1rem 0;">
+          Your final quote price would be
+        </p>
+        <div style="font-family: var(--font-heading); font-size: 2.8rem; color: #C5A059; font-weight: 700;">
+          ₹${activeQuotation.totalPrice || '0'}
+        </div>
+      </div>
+
+      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
+    </div>
+
+    <!-- PAGE 5: PAYMENT TIMELINE (Matching Image 5) -->
+    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 600;">Payment Timeline</h2>
+
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.5rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Advance Payment</h4>
+          <p style="font-size: 0.92rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            50% of the total billing value to be paid as an advance to block the dates.
+          </p>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Final Payment</h4>
+          <p style="font-size: 0.92rem; color: #2C2622; margin: 0 0 0.8rem 0; line-height: 1.6;">
+            Remaining 50% payment along with Transportation charges shall be done before/after wedding before receiving Raw footage.
+          </p>
+          <div style="font-size: 0.85rem; color: #55524E; font-style: italic;">
+            *You're required to provide us 2 units of 4TB Hard Drives to ensure the backup and safety of your data.
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 0.92rem; color: #1A1816; font-weight: 600; margin-top: 1.5rem;">
+        Note : Incase of any cancellation, the advance or the payments cannot be returned.
+      </div>
+    </div>
+
+    <!-- PAGE 6: ADDITIONAL SERVICES (Matching Image 6) -->
+    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 0.6rem 0; font-weight: 600;">Additional Services</h2>
+      <p style="font-size: 0.92rem; color: #2C2622; margin: 0 0 1.75rem 0; line-height: 1.6;">
+        If you're interested in expanding your package, we also provide additional services that are not included in the standard package:
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.5rem; position: relative;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">LED Wall</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
+            Digital LED Screens to showcase your Event video from multiple cameras LIVE. Equipped with a P3 display, of about 10 ft width and 8ft height.
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹25000</div>
+            <button type="button" style="background: #F8F4EC; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
+          </div>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem; position: relative;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">Web Live</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
+            Live telecasting of your event video footage on the web. You're required to provide a name to generate a custom link that you can share with your friends and family so that they can watch the event remotely.
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹15000</div>
+            <button type="button" style="background: #E6D7B8; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
+          </div>
+        </div>
+
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.5rem; position: relative;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">Drone</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
+            If you wish for a drone service for your events it would be chargeable at Rs.15,000/- per event. The drones will be used to cover decor only and are subject to government permissions.
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹15000</div>
+            <button type="button" style="background: #F8F4EC; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
+          </div>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem; position: relative;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">Print Albums</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
+            Premium designer album of 40 sheets portraying your wedding story and each costs
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹25000</div>
+            <button type="button" style="background: #E6D7B8; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
+    </div>
+
+    <!-- PAGE 7: TERMS OF SERVICE (Matching Images 7 & 8) -->
+    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 0.6rem 0; font-weight: 600;">Terms of Service</h2>
+      <p style="font-size: 0.92rem; color: #2C2622; margin: 0 0 1.75rem 0; line-height: 1.6;">
+        Our terms of service, including cancellation policies and copyright information, are detailed below for your review.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Travel Expense</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            You shall arrange for the travel and accommodation of our shoot crew for all your events occurring in places away from hyderabad.
+          </p>
+        </div>
+
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Project Cancellation</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            If you cancel the project after the advance payment & reserving team schedules for you, the payments cannot be returned.
+          </p>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Delivery Timeline</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            We strictly adhere to deliveries on the mentioned timeline. We do not entertain any early requests, as it will hamper timelines of other deliverables.
+          </p>
+        </div>
+
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Change of Plans</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            Any change of plans or postponement of events will be accommodated with the best team available on the new dates and chargeable depending on the type of events and crew required.
+          </p>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Shoot Permissions</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            Please note that all the required government permissions for any couple shoot shall be attained by the clients and the team is in no way responsible for it. In case of any fines/ inconvenience to the shoot, we are not to be held responsible.
+          </p>
+        </div>
+
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Print Albums</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            Photos selection has to be given by the client and that is mandatory. After the selection has been given it will take 25-30 days for the team to send you the layouts and once the approval has been made from the client, then it will take a week to hand over the albums. If selections are not made for more than 7 months from the date of the event then each album will be charged Rs. 15,000/- extra
+          </p>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Security for Loss</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            Client agrees to indemnify and hold harmless to the crew for any liability, damage or loss, related to technological failure, including data loss.
+          </p>
+        </div>
+
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Data Safety</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            Although we've never lost any event's data in the past 12 years, in the rarest probability of any data loss, we are liable to shoot another event for free or deduct the corresponding event charges.
+          </p>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Additional Services Quality</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            We don't take responsibility for the quality of Web-live, LED walls and other services, since they are provided by 3rd party vendors. Our primary focus lies on great work with our photos & videos.
+          </p>
+        </div>
+
+        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Video Revisions Timeline:</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            Any requests for video changes must be communicated within 20-30days from the date of final output delivery.
+          </p>
+        </div>
+
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
+          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Final Payment & Editing:</h4>
+          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
+            Post-event editing work will begin only after the final payment has been successfully completed. This ensures a streamlined workflow and helps us maintain our quality standards.
+          </p>
+        </div>
+      </div>
+
+      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
+    </div>
+
+    <!-- PAGE 8: NEXT STEPS & BRAND FOOTER (Matching Image 9) -->
+    <div class="proposal-section-page">
+      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1rem 0; font-weight: 600;">Next Steps</h2>
+      <p style="font-size: 0.95rem; color: #2C2622; line-height: 1.75; margin: 0 0 1.25rem 0;">
+        Please take a moment to review the proposal and attached terms of service. If you have any questions or would like to discuss specific details, feel free to reach out
+      </p>
+      <p style="font-size: 0.95rem; color: #2C2622; line-height: 1.75; margin: 0 0 1.5rem 0;">
+        We eagerly anticipate the opportunity to contribute to your special day and create a visual story that will be cherished for a lifetime.
+      </p>
+      <div style="font-size: 0.95rem; color: #1A1816; font-weight: 600; margin-bottom: 2.5rem;">
+        Best regards,<br>
+        <strong style="font-size: 1.1rem; font-family: var(--font-heading);">Timemachine & Co.</strong>
+      </div>
+
+      <!-- Centered Brand Logo Footer -->
+      <div style="text-align: center; border-top: 1px solid rgba(197, 160, 89, 0.25); padding-top: 3rem; margin-top: 3rem;">
+        <div style="display: inline-block; border: 2px solid #C5A059; padding: 0.6rem 1.2rem; text-align: center; margin-bottom: 1rem;">
+          <div style="font-family: var(--font-heading); font-size: 1.5rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1;">TM</div>
+          <div style="font-family: var(--font-heading); font-size: 1.1rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1; margin-top: 0.2rem;">&CO</div>
+        </div>
+
+        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.3rem 0; font-weight: 600;">TimemachineandCo</h3>
+        <div style="font-size: 0.88rem; color: #55524E; margin-bottom: 0.2rem;">https://www.timemachineworks.com</div>
+        <div style="font-size: 0.88rem; color: #C5A059; font-weight: 600;">+919705632982</div>
+      </div>
+    </div>
+  `;
 }
 
 // ==========================================================================
@@ -1181,4 +1980,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminTabs();
   initMediaModal();
   initSaveContent();
+  initQuotationGenerator();
 });
