@@ -166,6 +166,7 @@ function initAdminAuth() {
 function initAdminTabs() {
   const tabBtns = document.querySelectorAll('.admin-tab-btn');
   const tabPanels = document.querySelectorAll('.admin-panel-section');
+  const jumpBtns = document.querySelectorAll('[data-jump]');
 
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -175,7 +176,45 @@ function initAdminTabs() {
 
       btn.classList.add('active');
       const targetPanel = document.getElementById(targetId);
-      if (targetPanel) targetPanel.classList.add('active');
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+        if (targetId === 'tab-home') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    });
+  });
+
+  jumpBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const jumpId = btn.getAttribute('data-jump');
+      
+      // Ensure tab-home is active
+      const homeTabBtn = document.querySelector('.admin-tab-btn[data-tab="tab-home"]');
+      const homePanel = document.getElementById('tab-home');
+      const leadsPanel = document.getElementById('tab-leads');
+      
+      if (homeTabBtn) {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        homeTabBtn.classList.add('active');
+      }
+      if (homePanel) homePanel.classList.add('active');
+      if (leadsPanel) leadsPanel.classList.remove('active');
+
+      // Update active jump buttons
+      jumpBtns.forEach(b => {
+        if (b.getAttribute('data-jump') === jumpId) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+
+      // Scroll target section into view
+      const secEl = document.getElementById(jumpId);
+      if (secEl) {
+        secEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   });
 }
