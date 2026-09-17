@@ -1163,23 +1163,24 @@ p, .paragraph-text {
   -webkit-backdrop-filter: blur(14px);
 }
 
+.quote-modal-card,
 .wizard-card {
   position: relative;
   z-index: 2;
   width: 100%;
   max-width: 760px;
   min-height: 480px;
-  background: var(--color-canvas);
-  border: 1px solid var(--color-border-light);
+  background: #FFFFFF !important;
+  border: 1px solid var(--color-border-light) !important;
   border-radius: 20px;
   padding: 3.5rem 3rem 2.5rem 3rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 25px 70px rgba(26, 24, 22, 0.25);
+  box-shadow: 0 25px 70px rgba(26, 24, 22, 0.2);
   transform: translateY(25px) scale(0.97);
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
 }
 
 .quote-modal.active .wizard-card {
@@ -1190,8 +1191,8 @@ p, .paragraph-text {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--color-canvas-alt);
   border: 1px solid var(--color-border-light);
@@ -1214,6 +1215,8 @@ p, .paragraph-text {
   flex-direction: column;
   justify-content: space-between;
   min-height: 340px;
+  background: #FFFFFF;
+  color: var(--color-heading);
   animation: wizardFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -1252,6 +1255,7 @@ p, .paragraph-text {
   padding: 0.5rem;
   margin-bottom: 2rem;
   color: var(--color-heading);
+  background: #FFFFFF;
   font-family: var(--font-heading);
   letter-spacing: 0.08em;
 }
@@ -1273,14 +1277,14 @@ p, .paragraph-text {
   font-family: var(--font-heading);
   font-size: clamp(2.5rem, 5vw, 3.8rem);
   font-weight: 400;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   margin-bottom: 0.5rem;
 }
 
 .wizard-welcome-sub {
   font-family: var(--font-ui);
   font-size: clamp(1rem, 2vw, 1.25rem);
-  color: var(--color-body-muted);
+  color: var(--color-body-muted) !important;
   font-weight: 300;
 }
 
@@ -1292,7 +1296,7 @@ p, .paragraph-text {
 .wizard-back-btn {
   background: none;
   border: none;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   font-family: var(--font-ui);
   font-size: 0.85rem;
   font-weight: 600;
@@ -1321,7 +1325,7 @@ p, .paragraph-text {
   font-family: var(--font-heading);
   font-size: clamp(1.3rem, 2.4vw, 1.65rem);
   font-weight: 400;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   margin-bottom: 1.5rem;
 }
 
@@ -1338,40 +1342,40 @@ p, .paragraph-text {
   width: 100%;
   height: 56px;
   border-radius: 9999px;
-  background: #FFFFFF;
-  border: 1.5px solid var(--color-border-light);
+  background: #FFFFFF !important;
+  border: 1.5px solid var(--color-border-light) !important;
   padding: 0 1.75rem;
   font-family: var(--font-ui);
   font-size: 1.05rem;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   outline: none;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .wizard-input-pill::placeholder {
-  color: var(--color-body-muted);
+  color: var(--color-body-muted) !important;
 }
 
 .wizard-input-pill:focus {
-  border-color: var(--color-heading);
-  box-shadow: 0 0 0 3px rgba(26, 24, 22, 0.1);
+  border-color: var(--color-heading) !important;
+  box-shadow: 0 0 0 3px rgba(26, 24, 22, 0.1) !important;
 }
 
 /* Phone Number Country Picker */
 .wizard-phone-wrapper {
   display: flex;
   align-items: center;
-  border: 1.5px solid var(--color-border-light);
+  border: 1.5px solid var(--color-border-light) !important;
   border-radius: 9999px;
   padding: 0 0.5rem 0 1.25rem;
   height: 56px;
-  background: #FFFFFF;
+  background: #FFFFFF !important;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .wizard-phone-wrapper:focus-within {
-  border-color: var(--color-heading);
-  box-shadow: 0 0 0 3px rgba(26, 24, 22, 0.1);
+  border-color: var(--color-heading) !important;
+  box-shadow: 0 0 0 3px rgba(26, 24, 22, 0.1) !important;
 }
 
 .country-picker {
@@ -1385,7 +1389,7 @@ p, .paragraph-text {
 .country-select {
   background: transparent;
   border: none;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   font-family: var(--font-ui);
   font-size: 1rem;
   outline: none;
@@ -1393,8 +1397,8 @@ p, .paragraph-text {
 }
 
 .country-select option {
-  background: #FFFFFF;
-  color: var(--color-heading);
+  background: #FFFFFF !important;
+  color: var(--color-heading) !important;
 }
 
 .wizard-phone-input {
@@ -1402,6 +1406,8 @@ p, .paragraph-text {
   box-shadow: none !important;
   padding: 0 !important;
   height: 100% !important;
+  background: transparent !important;
+  color: var(--color-heading) !important;
 }
 
 /* Footer Navigation Buttons */
@@ -1425,8 +1431,8 @@ p, .paragraph-text {
   height: 50px;
   padding: 0 2.4rem;
   border-radius: 9999px;
-  background: var(--color-heading);
-  color: #FFFFFF;
+  background: var(--color-heading) !important;
+  color: #FFFFFF !important;
   font-family: var(--font-ui);
   font-size: 1rem;
   font-weight: 600;
@@ -1436,7 +1442,7 @@ p, .paragraph-text {
 }
 
 .wizard-btn-primary:hover {
-  background: var(--color-body);
+  background: var(--color-body) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(26, 24, 22, 0.2);
 }
@@ -1444,7 +1450,7 @@ p, .paragraph-text {
 .wizard-clear-btn {
   background: none;
   border: none;
-  color: var(--color-body-muted);
+  color: var(--color-body-muted) !important;
   font-family: var(--font-ui);
   font-size: 0.88rem;
   display: inline-flex;
@@ -1455,7 +1461,7 @@ p, .paragraph-text {
 }
 
 .wizard-clear-btn:hover {
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
 }
 
 /* Add Events Button */
@@ -1467,9 +1473,9 @@ p, .paragraph-text {
   height: 52px;
   padding: 0 2.2rem;
   border-radius: 9999px;
-  background: var(--color-heading);
+  background: var(--color-heading) !important;
   border: 1.5px solid var(--color-heading);
-  color: #FFFFFF;
+  color: #FFFFFF !important;
   font-family: var(--font-ui);
   font-size: 1rem;
   font-weight: 600;
@@ -1479,7 +1485,7 @@ p, .paragraph-text {
 }
 
 .add-events-purple-btn:hover {
-  background: var(--color-body);
+  background: var(--color-body) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(26, 24, 22, 0.3);
 }
@@ -1517,9 +1523,9 @@ p, .paragraph-text {
   grid-template-columns: 1.4fr 1.1fr 1fr 1.2fr 1fr 0.8fr;
   gap: 0.5rem;
   align-items: center;
-  background: var(--color-canvas-alt);
-  border: 1px solid var(--color-border-light);
-  color: var(--color-heading);
+  background: var(--color-canvas-alt) !important;
+  border: 1px solid var(--color-border-light) !important;
+  color: var(--color-heading) !important;
   padding: 0.85rem 1rem;
   border-radius: 6px;
   font-family: var(--font-ui);
@@ -1528,7 +1534,7 @@ p, .paragraph-text {
 }
 
 .event-col-val {
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1586,7 +1592,7 @@ p, .paragraph-text {
   font-family: var(--font-heading);
   font-size: clamp(2.2rem, 4vw, 3.2rem);
   font-weight: 300;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   margin-bottom: 1.25rem;
   line-height: 1.2;
 }
@@ -1594,7 +1600,7 @@ p, .paragraph-text {
 .wizard-success-desc {
   font-family: var(--font-paragraph);
   font-size: clamp(0.95rem, 1.8vw, 1.15rem);
-  color: var(--color-body);
+  color: var(--color-body) !important;
   font-weight: 300;
   max-width: 540px;
   line-height: 1.6;
@@ -1637,11 +1643,11 @@ p, .paragraph-text {
   z-index: 2;
   width: 100%;
   max-width: 480px;
-  background: var(--color-canvas);
-  border: 1px solid var(--color-border-light);
+  background: #FFFFFF !important;
+  border: 1px solid var(--color-border-light) !important;
   border-radius: 20px;
   padding: 2.5rem 2.2rem 2.2rem 2.2rem;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   box-shadow: 0 20px 60px rgba(26, 24, 22, 0.2);
   transform: scale(0.95);
   transition: transform 0.3s ease;
@@ -1667,7 +1673,7 @@ p, .paragraph-text {
   font-size: 1.8rem;
   font-weight: 400;
   text-align: center;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   margin-bottom: 2rem;
 }
 
@@ -1681,25 +1687,25 @@ p, .paragraph-text {
   height: 48px;
   background: transparent;
   border: none;
-  border-bottom: 1.5px solid var(--color-border-light);
+  border-bottom: 1.5px solid var(--color-border-light) !important;
   font-family: var(--font-ui);
   font-size: 1.05rem;
-  color: var(--color-heading);
+  color: var(--color-heading) !important;
   outline: none;
   transition: border-color 0.2s ease;
 }
 
 .add-event-input::placeholder {
-  color: var(--color-body-muted);
+  color: var(--color-body-muted) !important;
 }
 
 .add-event-input:focus, .add-event-select:focus {
-  border-bottom-color: var(--color-heading);
+  border-bottom-color: var(--color-heading) !important;
 }
 
 .add-event-select option {
-  background: #FFFFFF;
-  color: var(--color-heading);
+  background: #FFFFFF !important;
+  color: var(--color-heading) !important;
 }
 
 .add-event-actions {
@@ -1710,8 +1716,8 @@ p, .paragraph-text {
   width: 100%;
   height: 52px;
   border-radius: 9999px;
-  background: var(--color-heading);
-  color: #FFFFFF;
+  background: var(--color-heading) !important;
+  color: #FFFFFF !important;
   font-family: var(--font-ui);
   font-size: 1rem;
   font-weight: 600;
@@ -1721,9 +1727,10 @@ p, .paragraph-text {
 }
 
 .add-event-confirm-btn:hover {
-  background: var(--color-body);
+  background: var(--color-body) !important;
   box-shadow: 0 4px 16px rgba(26, 24, 22, 0.25);
 }
+
 
 
 @media (max-width: 600px) {
