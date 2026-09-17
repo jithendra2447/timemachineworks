@@ -130,23 +130,51 @@
       transform: translateY(-2px);
     }
 
+    /* 3D ARC GALLERY */
+    .gallery-arc-container {
+      perspective: 1000px;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 0.6rem !important;
+      margin: 2rem auto !important;
+      padding: 1.5rem 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+      position: relative !important;
+    }
+
+    .gallery-arc-card {
+      display: inline-block !important;
+      border-radius: 16px;
+      overflow: hidden;
+      flex-shrink: 0 !important;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+      cursor: pointer;
+    }
+
+    .gallery-arc-card:hover {
+      transform: scale(1.08) translateZ(30px) !important;
+      z-index: 20 !important;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
+    }
+
     /* MOBILE FLOATING ACTION BAR */
     .mobile-floating-bar {
       display: none;
     }
 
     /* FULL RESPONSIVE MEDIA QUERIES FOR MOBILE, TABLET & DESKTOP */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .proposal-navbar {
         padding: 0.85rem 1.25rem;
       }
 
-      .proposal-client-badge {
-        display: none;
-      }
-
       .proposal-nav-actions {
-        display: none; /* Hide header buttons on mobile, replace with floating glass bar */
+        display: none !important; /* Hide header buttons on mobile, replace with floating glass bar */
       }
 
       .mobile-floating-bar {
@@ -163,7 +191,7 @@
         border: 1px solid rgba(197, 160, 89, 0.4);
         border-radius: 999px;
         padding: 0.5rem 0.75rem;
-        display: flex;
+        display: flex !important;
         align-items: center;
         justify-content: space-around;
         box-shadow: 0 15px 35px rgba(0,0,0,0.6);
@@ -172,18 +200,7 @@
       .mobile-floating-bar .nav-btn {
         padding: 0.5rem 0.85rem;
         font-size: 0.76rem;
-      }
-
-      .proposal-nav-actions {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .nav-btn {
-        padding: 0.45rem 0.85rem;
-        font-size: 0.78rem;
+        white-space: nowrap;
       }
 
       .proposal-outer-wrapper {
@@ -228,13 +245,13 @@
       }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .gallery-arc-container {
         perspective: none !important;
         gap: 0.3rem !important;
         overflow-x: auto !important;
         justify-content: flex-start !important;
-        padding: 1rem 0 !important;
+        padding: 1rem 0.5rem !important;
         -webkit-overflow-scrolling: touch;
       }
 
