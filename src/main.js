@@ -1064,6 +1064,322 @@ function initScrollEffects() {
 }
 
 // ==========================================================================
+// 12. GET A QUOTE MULTI-STEP WIZARD LOGIC
+// ==========================================================================
+function initQuoteModal() {
+  const modal = document.getElementById('quote-modal');
+  const backdrop = document.getElementById('quote-modal-backdrop');
+  const closeBtn = document.getElementById('quote-modal-close-btn');
+  const getQuoteBtn = document.getElementById('footer-get-quote-btn');
+  const steps = Array.from(document.querySelectorAll('.wizard-step'));
+  let currentStep = 0;
+  let addedEvents = [];
+
+  const addEventModal = document.getElementById('add-event-modal');
+  const addEventBackdrop = document.getElementById('add-event-backdrop');
+  const openAddEventBtn = document.getElementById('open-add-event-btn');
+  const closeAddEventBtn = document.getElementById('close-add-event-btn');
+  const addEventForm = document.getElementById('add-event-form');
+  const addedEventsListEl = document.getElementById('added-events-list');
+
+  const openModal = () => {
+    if (modal) modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    goToStep(0);
+  };
+
+  const closeModal = () => {
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  const goToStep = (stepIndex) => {
+    if (stepIndex < 0 || stepIndex >= steps.length) return;
+    currentStep = stepIndex;
+    steps.forEach((step, idx) => {
+      if (idx === currentStep) {
+        step.classList.add('active');
+        const input = step.querySelector('input');
+        if (input) setTimeout(() => input.focus(), 150);
+      } else {
+        step.classList.remove('active');
+      }
+    });
+  };
+
+  let editingIndex = null;
+  const tableWrapperEl = document.getElementById('added-events-table-wrapper');
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+  };
+
+  const renderAddedEvents = () => {
+    if (!addedEventsListEl) return;
+    if (addedEvents.length === 0) {
+      addedEventsListEl.innerHTML = '';
+      if (tableWrapperEl) tableWrapperEl.style.display = 'none';
+      return;
+    }
+    if (tableWrapperEl) tableWrapperEl.style.display = 'block';
+
+    addedEventsListEl.innerHTML = addedEvents.map((evt, idx) => `
+      <div class="event-row-card">
+        <span class="event-col-val">${evt.name}</span>
+        <span class="event-col-val">${formatDate(evt.date)}</span>
+        <span class="event-col-val">${evt.time || '-'}</span>
+        <span class="event-col-val">${evt.location || '-'}</span>
+        <span class="event-col-val">${evt.guests || '-'}</span>
+        <div class="event-col-actions">
+          <button type="button" class="action-btn-edit" data-index="${idx}" aria-label="Edit Event">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          </button>
+          <button type="button" class="action-btn-delete" data-index="${idx}" aria-label="Delete Event">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    addedEventsListEl.querySelectorAll('.action-btn-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+        const item = addedEvents[index];
+        if (item) {
+          editingIndex = index;
+          const nameSelect = document.getElementById('event-name-select');
+          const dateInput = document.getElementById('event-date-input');
+          const timeSelect = document.getElementById('event-time-select');
+          const locationInput = document.getElementById('event-location-input');
+          const guestsInput = document.getElementById('event-guests-input');
+
+          if (nameSelect) nameSelect.value = item.name;
+          if (dateInput) dateInput.value = item.date;
+          if (timeSelect) timeSelect.value = item.time || '';
+          if (locationInput) locationInput.value = item.location || '';
+          if (guestsInput) guestsInput.value = item.guests || '';
+
+          openAddEventPopup();
+        }
+      });
+    });
+
+    addedEventsListEl.querySelectorAll('.action-btn-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+        addedEvents.splice(index, 1);
+        renderAddedEvents();
+      });
+    });
+  };
+
+  const openAddEventPopup = () => {
+    if (addEventModal) addEventModal.classList.add('active');
+  };
+
+  const closeAddEventPopup = () => {
+    if (addEventModal) addEventModal.classList.remove('active');
+    if (addEventForm) addEventForm.reset();
+    editingIndex = null;
+  };
+
+  if (openAddEventBtn) {
+    openAddEventBtn.addEventListener('click', () => {
+      editingIndex = null;
+      if (addEventForm) addEventForm.reset();
+      openAddEventPopup();
+    });
+  }
+
+  if (closeAddEventBtn) closeAddEventBtn.addEventListener('click', closeAddEventPopup);
+  if (addEventBackdrop) addEventBackdrop.addEventListener('click', closeAddEventPopup);
+
+  if (addEventForm) {
+    addEventForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nameSelect = document.getElementById('event-name-select');
+      const dateInput = document.getElementById('event-date-input');
+      const timeSelect = document.getElementById('event-time-select');
+      const locationInput = document.getElementById('event-location-input');
+      const guestsInput = document.getElementById('event-guests-input');
+
+      if (!nameSelect.value || !dateInput.value) return;
+
+      const eventData = {
+        name: nameSelect.value,
+        date: dateInput.value,
+        time: timeSelect ? timeSelect.value : '',
+        location: locationInput ? locationInput.value : '',
+        guests: guestsInput ? guestsInput.value : ''
+      };
+
+      if (editingIndex !== null && editingIndex >= 0 && editingIndex < addedEvents.length) {
+        addedEvents[editingIndex] = eventData;
+      } else {
+        addedEvents.push(eventData);
+      }
+
+      renderAddedEvents();
+      closeAddEventPopup();
+    });
+  }
+
+  steps.forEach((step, idx) => {
+    const nextBtn = step.querySelector('.wizard-next-btn');
+    const submitBtn = step.querySelector('#wizard-final-submit-btn');
+    const backBtn = step.querySelector('.wizard-back-btn');
+    const clearBtn = step.querySelector('.wizard-clear-btn');
+    const input = step.querySelector('input');
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (input && input.hasAttribute('required') && !input.value.trim()) {
+          input.reportValidity();
+          input.focus();
+          return;
+        }
+        goToStep(idx + 1);
+      });
+    }
+
+    if (submitBtn) {
+      submitBtn.addEventListener('click', async () => {
+        if (addedEvents.length === 0) {
+          alert('Please click "+ Add Events" to add at least one event before submitting.');
+          openAddEventPopup();
+          return;
+        }
+
+        const clientName = document.getElementById('step-client-name')?.value || '';
+        const groomName = document.getElementById('step-groom-name')?.value || '';
+        const brideName = document.getElementById('step-bride-name')?.value || '';
+        const countryCode = document.getElementById('step-country-code')?.value || '+91';
+        const phone = document.getElementById('step-phone-number')?.value || '';
+
+        const payload = {
+          clientName,
+          groomName,
+          brideName,
+          countryCode,
+          phone,
+          events: addedEvents
+        };
+
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Submitting... ⏳';
+        submitBtn.disabled = true;
+
+        try {
+          // Attempt POST to local Express server API
+          const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000/api/quote' : '/api/quote';
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          console.log('✅ Quote API Response:', data);
+        } catch (err) {
+          console.warn('⚠️ API dispatch warning (proceeding with local completion):', err.message);
+        } finally {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+
+          const successStepIdx = steps.findIndex(s => s.getAttribute('data-step') === 'success');
+          if (successStepIdx !== -1) goToStep(successStepIdx);
+        }
+      });
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        goToStep(idx - 1);
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (input) input.value = '';
+        const select = step.querySelector('select');
+        if (select) select.selectedIndex = 0;
+        if (idx === 5) {
+          addedEvents = [];
+          renderAddedEvents();
+        }
+      });
+    }
+
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (nextBtn) nextBtn.click();
+        }
+      });
+    }
+  });
+
+  const startOverBtn = document.getElementById('wizard-start-over-btn');
+  if (startOverBtn) {
+    startOverBtn.addEventListener('click', () => {
+      steps.forEach(step => {
+        const input = step.querySelector('input');
+        if (input) input.value = '';
+      });
+      addedEvents = [];
+      renderAddedEvents();
+      goToStep(0);
+    });
+  }
+
+  if (getQuoteBtn) getQuoteBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (addEventModal && addEventModal.classList.contains('active')) {
+        closeAddEventPopup();
+      } else if (modal && modal.classList.contains('active')) {
+        closeModal();
+      }
+    }
+  });
+
+  const lbInquireBtn = document.getElementById('lb-inquire-btn');
+  const storyInquireBtn = document.getElementById('story-inquire-btn');
+  const bookHeaderBtn = document.querySelector('.header-actions .btn-primary');
+
+  if (lbInquireBtn) {
+    lbInquireBtn.addEventListener('click', () => {
+      const lbModal = document.getElementById('lightbox-modal');
+      if (lbModal) lbModal.classList.remove('active');
+      openModal();
+    });
+  }
+
+  if (storyInquireBtn) {
+    storyInquireBtn.addEventListener('click', () => {
+      const filmModal = document.getElementById('film-story-modal');
+      if (filmModal) filmModal.classList.remove('active');
+      openModal();
+    });
+  }
+
+  if (bookHeaderBtn) {
+    bookHeaderBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal();
+    });
+  }
+}
+
+// ==========================================================================
 // INITIALIZATION
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -1078,5 +1394,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderExhibitionsAndMonographs();
   initFormAndSoundHandlers();
   initScrollEffects();
+  initQuoteModal();
 });
+
 
