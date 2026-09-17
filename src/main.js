@@ -1074,6 +1074,7 @@ function initQuoteModal() {
   const steps = Array.from(document.querySelectorAll('.wizard-step'));
   let currentStep = 0;
   let addedEvents = [];
+  let editingIndex = null;
 
   const addEventModal = document.getElementById('add-event-modal');
   const addEventBackdrop = document.getElementById('add-event-backdrop');
@@ -1081,6 +1082,7 @@ function initQuoteModal() {
   const closeAddEventBtn = document.getElementById('close-add-event-btn');
   const addEventForm = document.getElementById('add-event-form');
   const addedEventsListEl = document.getElementById('added-events-list');
+  const tableWrapperEl = document.getElementById('added-events-table-wrapper');
 
   const STEP_BACKGROUNDS = {
     0: "url('/images/niharika/main-shrine-couple.jpg')",
@@ -1092,86 +1094,16 @@ function initQuoteModal() {
     "success": "url('/images/niharika/pooja-prayer.jpg')"
   };
 
-  const resetWizardForm = () => {
-    steps.forEach(step => {
-      const inputs = step.querySelectorAll('input, select');
-      inputs.forEach(inp => {
-        if (inp.tagName.toLowerCase() === 'select') {
-          inp.selectedIndex = 0;
-        } else {
-          inp.value = '';
-        }
-      });
-    });
-    addedEvents = [];
-    if (typeof renderAddedEvents === 'function') {
-      renderAddedEvents();
-    }
-    if (addEventForm) {
-      addEventForm.reset();
-    }
-  };
-
-  const openModal = () => {
-    resetWizardForm();
-    if (modal) modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    goToStep(0);
-  };
-
-  const closeModal = () => {
-    if (modal) modal.classList.remove('active');
-    document.body.style.overflow = '';
-    resetWizardForm();
-  };
-
-  const goToStep = (stepIndex) => {
-    if (typeof stepIndex === 'number') {
-      if (stepIndex < 0 || stepIndex >= steps.length) return;
-      currentStep = stepIndex;
-    }
-
-    let bgKey = currentStep;
-    const targetStepEl = steps[currentStep];
-    if (targetStepEl) {
-      const stepAttr = targetStepEl.getAttribute('data-step');
-      if (stepAttr === 'success') bgKey = 'success';
-    }
-
-    if (wizardCard && STEP_BACKGROUNDS[bgKey]) {
-      wizardCard.style.setProperty('--wizard-bg-image', STEP_BACKGROUNDS[bgKey]);
-    }
-
-    steps.forEach((step, idx) => {
-      if (idx === currentStep) {
-        step.classList.add('active');
-        const input = step.querySelector('input');
-        if (input) setTimeout(() => input.focus(), 150);
-      } else {
-        step.classList.remove('active');
-      }
-    });
-  };
-
-  // Clean form state on page load / refresh
-  resetWizardForm();
-  window.addEventListener('pageshow', () => {
-    resetWizardForm();
-  });
-
-  let editingIndex = null;
-  const tableWrapperEl = document.getElementById('added-events-table-wrapper');
-
-  const formatDate = (dateStr) => {
+  function formatDate(dateStr) {
     if (!dateStr) return '';
     const parts = dateStr.split('-');
     if (parts.length === 3) {
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
     return dateStr;
-  };
+  }
 
-  const renderAddedEvents = () => {
+  function renderAddedEvents() {
     if (!addedEventsListEl) return;
     if (addedEvents.length === 0) {
       addedEventsListEl.innerHTML = '';
@@ -1228,58 +1160,82 @@ function initQuoteModal() {
         renderAddedEvents();
       });
     });
-  };
+  }
 
-  const openAddEventPopup = () => {
+  function resetWizardForm() {
+    steps.forEach(step => {
+      const inputs = step.querySelectorAll('input, select');
+      inputs.forEach(inp => {
+        if (inp.tagName.toLowerCase() === 'select') {
+          inp.selectedIndex = 0;
+        } else {
+          inp.value = '';
+        }
+      });
+    });
+    addedEvents = [];
+    renderAddedEvents();
+    if (addEventForm) {
+      addEventForm.reset();
+    }
+  }
+
+  function openModal() {
+    resetWizardForm();
+    if (modal) modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    goToStep(0);
+  }
+
+  function closeModal() {
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+    resetWizardForm();
+  }
+
+  function goToStep(stepIndex) {
+    if (typeof stepIndex === 'number') {
+      if (stepIndex < 0 || stepIndex >= steps.length) return;
+      currentStep = stepIndex;
+    }
+
+    let bgKey = currentStep;
+    const targetStepEl = steps[currentStep];
+    if (targetStepEl) {
+      const stepAttr = targetStepEl.getAttribute('data-step');
+      if (stepAttr === 'success') bgKey = 'success';
+    }
+
+    if (wizardCard && STEP_BACKGROUNDS[bgKey]) {
+      wizardCard.style.setProperty('--wizard-bg-image', STEP_BACKGROUNDS[bgKey]);
+    }
+
+    steps.forEach((step, idx) => {
+      if (idx === currentStep) {
+        step.classList.add('active');
+        const input = step.querySelector('input');
+        if (input) setTimeout(() => input.focus(), 150);
+      } else {
+        step.classList.remove('active');
+      }
+    });
+  }
+
+  function openAddEventPopup() {
     if (addEventModal) addEventModal.classList.add('active');
-  };
+  }
 
-  const closeAddEventPopup = () => {
+  function closeAddEventPopup() {
     if (addEventModal) addEventModal.classList.remove('active');
     if (addEventForm) addEventForm.reset();
     editingIndex = null;
-  };
-
-  if (openAddEventBtn) {
-    openAddEventBtn.addEventListener('click', () => {
-      editingIndex = null;
-      if (addEventForm) addEventForm.reset();
-      openAddEventPopup();
-    });
   }
 
-  if (closeAddEventBtn) closeAddEventBtn.addEventListener('click', closeAddEventPopup);
-  if (addEventBackdrop) addEventBackdrop.addEventListener('click', closeAddEventPopup);
-
-  if (addEventForm) {
-    addEventForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const nameSelect = document.getElementById('event-name-select');
-      const dateInput = document.getElementById('event-date-input');
-      const timeSelect = document.getElementById('event-time-select');
-      const locationInput = document.getElementById('event-location-input');
-      const guestsInput = document.getElementById('event-guests-input');
-
-      if (!nameSelect.value || !dateInput.value) return;
-
-      const eventData = {
-        name: nameSelect.value,
-        date: dateInput.value,
-        time: timeSelect ? timeSelect.value : '',
-        location: locationInput ? locationInput.value : '',
-        guests: guestsInput ? guestsInput.value : ''
-      };
-
-      if (editingIndex !== null && editingIndex >= 0 && editingIndex < addedEvents.length) {
-        addedEvents[editingIndex] = eventData;
-      } else {
-        addedEvents.push(eventData);
-      }
-
-      renderAddedEvents();
-      closeAddEventPopup();
-    });
-  }
+  // Clean form state on page load / refresh
+  resetWizardForm();
+  window.addEventListener('pageshow', () => {
+    resetWizardForm();
+  });
 
   steps.forEach((step, idx) => {
     const nextBtn = step.querySelector('.wizard-next-btn');
