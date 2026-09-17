@@ -111,6 +111,215 @@ let activeContent = {
   portfolio: [...PORTFOLIO_ITEMS]
 };
 
+// Undo History Stack & Recent Media State
+let historyStack = [];
+let recentMedia = JSON.parse(localStorage.getItem('studio_recent_media') || '[]');
+
+if (recentMedia.length === 0) {
+  recentMedia = [
+    { url: './images/niharika/main-shrine-couple.jpg', type: 'image', timestamp: Date.now() - 50000 },
+    { url: './images/niharika/lotus-portrait.jpg', type: 'image', timestamp: Date.now() - 40000 },
+    { url: './images/niharika/pooja-lighting.jpg', type: 'image', timestamp: Date.now() - 30000 },
+    { url: './images/niharika/bridal-braid.jpg', type: 'image', timestamp: Date.now() - 20000 },
+    { url: './images/niharika/preparation.jpg', type: 'image', timestamp: Date.now() - 10000 },
+    { url: './videos/hero-wedding.mp4', type: 'video', timestamp: Date.now() }
+  ];
+  try {
+    localStorage.setItem('studio_recent_media', JSON.stringify(recentMedia));
+  } catch (e) {}
+}
+
+function pushHistorySnapshot() {
+  if (historyStack.length >= 30) {
+    historyStack.shift();
+  }
+  historyStack.push(JSON.parse(JSON.stringify(activeContent)));
+  updateUndoButtonState();
+}
+
+function updateUndoButtonState() {
+  const undoBtn = document.getElementById('admin-undo-btn');
+  const countEl = document.getElementById('undo-count');
+  if (countEl) countEl.textContent = historyStack.length;
+  if (undoBtn) {
+    undoBtn.disabled = historyStack.length === 0;
+  }
+}
+
+function handleUndo() {
+  if (historyStack.length === 0) return;
+  const prevSnapshot = historyStack.pop();
+  activeContent = prevSnapshot;
+  populateAdminForms();
+  localStorage.setItem('studio_content_cache', JSON.stringify(activeContent));
+  updateUndoButtonState();
+  showToast('Restored previous version snapshot!');
+}
+
+function addRecentMedia(url, type = 'image') {
+  if (!url || typeof url !== 'string') return;
+  url = url.trim();
+  if (!url) return;
+
+  recentMedia = recentMedia.filter(m => m.url !== url);
+  recentMedia.unshift({ url, type, timestamp: Date.now() });
+
+  if (recentMedia.length > 50) {
+    recentMedia = recentMedia.slice(0, 50);
+  }
+
+  try {
+    localStorage.setItem('studio_recent_media', JSON.stringify(recentMedia));
+  } catch (e) {
+    console.warn('LocalStorage limit reached for recent media:', e);
+  }
+
+  renderMediaModalGrid();
+  renderInputMediaChips();
+}
+
+function renderInputMediaChips() {
+  const thumbRows = document.querySelectorAll('.admin-thumb-row');
+  
+  thumbRows.forEach(row => {
+    const input = row.querySelector('.admin-input');
+    if (!input) return;
+
+    let chipsContainer = row.nextElementSibling;
+    if (!chipsContainer || !chipsContainer.classList.contains('recent-media-chips')) {
+      chipsContainer = document.createElement('div');
+      chipsContainer.className = 'recent-media-chips';
+      chipsContainer.style.cssText = 'display: flex; gap: 0.4rem; margin-top: 0.5rem; align-items: center; flex-wrap: wrap;';
+      row.parentNode.insertBefore(chipsContainer, row.nextSibling);
+    }
+
+    const itemsToShow = recentMedia.slice(0, 6);
+    if (itemsToShow.length === 0) {
+      chipsContainer.innerHTML = '';
+      return;
+    }
+
+    chipsContainer.innerHTML = `
+      <span style="font-size: 0.72rem; color: var(--color-body-muted); font-family: var(--font-ui); font-weight: 500;">Recent:</span>
+      ` + itemsToShow.map(item => {
+        const isVideo = item.type === 'video' || item.url.match(/\.(mp4|webm|mov)$/i);
+        return `
+          <div class="recent-media-chip" title="Click to reuse this previous image/video" data-url="${item.url}" style="width: 36px; height: 36px; border-radius: 6px; overflow: hidden; border: 1px solid var(--color-border-light); cursor: pointer; flex-shrink: 0; background: #1A1816; position: relative;">
+            ${isVideo
+              ? `<video src="${item.url}" muted style="width:100%; height:100%; object-fit:cover; pointer-events:none;"></video>`
+              : `<img src="${item.url}" alt="Recent" style="width:100%; height:100%; object-fit:cover; pointer-events:none;" onerror="this.src='./images/niharika/main-shrine-couple.jpg'">`
+            }
+          </div>
+        `;
+      }).join('');
+
+    chipsContainer.querySelectorAll('.recent-media-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const url = chip.getAttribute('data-url');
+        if (url && input) {
+          pushHistorySnapshot();
+          input.value = url;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          showToast('Selected previous picture/video!');
+        }
+      });
+    });
+  });
+}
+
+function initMediaModal() {
+  const modalOverlay = document.getElementById('admin-media-modal');
+  const openBtn = document.getElementById('open-media-modal-btn');
+  const closeBtn = document.getElementById('close-media-modal-btn');
+
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      if (modalOverlay) {
+        modalOverlay.classList.add('active');
+        renderMediaModalGrid();
+      }
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      if (modalOverlay) modalOverlay.classList.remove('active');
+    });
+  }
+
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        modalOverlay.classList.remove('active');
+      }
+    });
+  }
+}
+
+function renderMediaModalGrid() {
+  const grid = document.getElementById('media-modal-grid');
+  if (!grid) return;
+
+  if (recentMedia.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--color-body-muted);">
+        No recent uploads stored yet. Upload or edit an image/video to store it here.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = recentMedia.map((item, idx) => {
+    const isVideo = item.type === 'video' || item.url.match(/\.(mp4|webm|mov)$/i);
+    const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Stored Asset';
+
+    return `
+      <div class="media-modal-card">
+        <div class="media-modal-thumb">
+          ${isVideo
+            ? `<video src="${item.url}" muted loop playsinline autoplay style="width:100%; height:100%; object-fit:cover;"></video>`
+            : `<img src="${item.url}" alt="Asset ${idx+1}" onerror="this.src='./images/niharika/main-shrine-couple.jpg'">`
+          }
+          <span class="admin-thumb-badge" style="position:absolute; top:6px; right:6px;">${isVideo ? 'VIDEO' : 'IMAGE'}</span>
+        </div>
+        <div class="media-modal-info">
+          <span class="media-modal-date">${dateStr}</span>
+          <div class="media-modal-actions">
+            <button type="button" class="media-modal-btn copy-url-btn" data-url="${item.url}">
+              Copy Link
+            </button>
+            <button type="button" class="media-modal-btn use-asset-btn" data-url="${item.url}">
+              Copy & Close
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.copy-url-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const url = e.currentTarget.getAttribute('data-url');
+      if (url) {
+        navigator.clipboard.writeText(url);
+        showToast('Media URL copied to clipboard!');
+      }
+    });
+  });
+
+  grid.querySelectorAll('.use-asset-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const url = e.currentTarget.getAttribute('data-url');
+      if (url) {
+        navigator.clipboard.writeText(url);
+        showToast('Asset URL copied! Paste it into any picture URL field.');
+        const modalOverlay = document.getElementById('admin-media-modal');
+        if (modalOverlay) modalOverlay.classList.remove('active');
+      }
+    });
+  });
+}
+
 // ==========================================================================
 // 1. AUTHENTICATION GATING
 // ==========================================================================
@@ -427,14 +636,14 @@ function populateAdminForms() {
   // Portfolio
   renderPortfolioManager();
 
-  // Wedding Films
-  renderFilmsManager();
-
-  // Portfolio
-  renderPortfolioManager();
-
   // Attach live input listeners
   initLiveMediaPreviewListeners();
+
+  // Render clickable recent media chips below image/video inputs
+  renderInputMediaChips();
+
+  // Sync Undo Button status
+  updateUndoButtonState();
 }
 
 function setupFileUploadButton(btn, inputEl, previewEl1, previewEl2) {
@@ -464,11 +673,15 @@ function setupFileUploadButton(btn, inputEl, previewEl1, previewEl2) {
     const reader = new FileReader();
     reader.onload = (evt) => {
       const dataUrl = evt.target.result;
+      pushHistorySnapshot();
       inputEl.value = dataUrl;
       inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 
       if (previewEl1) previewEl1.src = dataUrl;
       if (previewEl2) previewEl2.src = dataUrl;
+
+      const isVideo = file.type ? file.type.startsWith('video') : dataUrl.startsWith('data:video');
+      addRecentMedia(dataUrl, isVideo ? 'video' : 'image');
 
       btn.disabled = false;
       btn.innerHTML = `
@@ -479,7 +692,7 @@ function setupFileUploadButton(btn, inputEl, previewEl1, previewEl2) {
         btn.innerHTML = originalBtnHTML;
       }, 2500);
 
-      showToast('File uploaded successfully! Click "Save All Content Changes" to make it live.');
+      showToast('File uploaded and saved to recent pictures history!');
     };
 
     reader.readAsDataURL(file);
@@ -621,8 +834,10 @@ function renderFilmsManager() {
     btn.addEventListener('click', (e) => {
       const idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
       if (confirm('Are you sure you want to remove this film from your archive?')) {
+        pushHistorySnapshot();
         activeContent.weddingFilms.splice(idx, 1);
         renderFilmsManager();
+        showToast('Film deleted. Click "Undo Edit" to restore it anytime.');
       }
     });
   });
@@ -743,8 +958,10 @@ function renderPortfolioManager() {
     btn.addEventListener('click', (e) => {
       const idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
       if (confirm('Are you sure you want to remove this item from your portfolio?')) {
+        pushHistorySnapshot();
         activeContent.portfolio.splice(idx, 1);
         renderPortfolioManager();
+        showToast('Portfolio item deleted. Click "Undo Edit" to restore it anytime.');
       }
     });
   });
@@ -755,9 +972,14 @@ function renderPortfolioManager() {
 // ==========================================================================
 function initSaveContent() {
   const saveBtn = document.getElementById('admin-save-all-btn');
+  const undoBtn = document.getElementById('admin-undo-btn');
   const refreshLeadsBtn = document.getElementById('refresh-leads-btn');
   const addFilmBtn = document.getElementById('add-film-btn');
   const addPortBtn = document.getElementById('add-portfolio-btn');
+
+  if (undoBtn) {
+    undoBtn.addEventListener('click', handleUndo);
+  }
 
   if (refreshLeadsBtn) {
     refreshLeadsBtn.addEventListener('click', loadLeads);
@@ -765,6 +987,7 @@ function initSaveContent() {
 
   if (addFilmBtn) {
     addFilmBtn.addEventListener('click', () => {
+      pushHistorySnapshot();
       activeContent.weddingFilms.unshift({
         id: 'film-' + Date.now(),
         title: 'New Couple Title',
@@ -778,11 +1001,13 @@ function initSaveContent() {
         reviewAuthor: '— Bride & Groom'
       });
       renderFilmsManager();
+      showToast('New Film item added! Use Undo if you wish to revert.');
     });
   }
 
   if (addPortBtn) {
     addPortBtn.addEventListener('click', () => {
+      pushHistorySnapshot();
       activeContent.portfolio.unshift({
         id: 'work-' + Date.now(),
         title: 'New Ceremony Still',
@@ -794,18 +1019,25 @@ function initSaveContent() {
         exif: { camera: 'Leica M11', lens: 'Noctilux 50mm', aperture: 'f/1.2', focal: '50mm', shutter: '1/2000s', iso: 'ISO 100', format: 'Digital RAW' }
       });
       renderPortfolioManager();
+      showToast('New Portfolio item added! Use Undo if you wish to revert.');
     });
   }
 
   if (saveBtn) {
     saveBtn.addEventListener('click', async () => {
+      pushHistorySnapshot();
+
       // Gather Hero
       activeContent.hero.headline = document.getElementById('hero-headline-input')?.value || 'Timemachine & Co';
       activeContent.hero.subtitle = document.getElementById('hero-subtitle-input')?.value || '';
+      const hv1 = document.getElementById('hero-video-1')?.value || './videos/hero-wedding.mp4';
+      const hv2 = document.getElementById('hero-video-2')?.value || './videos/hero-wedding.mp4';
       activeContent.hero.videos = [
-        { title: 'Primary Hero', videoUrl: document.getElementById('hero-video-1')?.value || './videos/hero-wedding.mp4' },
-        { title: 'Lake Como Highlight', videoUrl: document.getElementById('hero-video-2')?.value || './videos/hero-wedding.mp4' }
+        { title: 'Primary Hero', videoUrl: hv1 },
+        { title: 'Lake Como Highlight', videoUrl: hv2 }
       ];
+      if (hv1) addRecentMedia(hv1, 'video');
+      if (hv2) addRecentMedia(hv2, 'video');
 
       // Gather About
       activeContent.about.tag = document.getElementById('about-tag-input')?.value || '';
@@ -815,12 +1047,14 @@ function initSaveContent() {
         document.getElementById('about-p2-input')?.value || '',
         document.getElementById('about-p3-input')?.value || ''
       ];
-      activeContent.about.collageImages = [
+      const abImgs = [
         document.getElementById('about-img-1')?.value || '',
         document.getElementById('about-img-2')?.value || '',
         document.getElementById('about-img-3')?.value || '',
         document.getElementById('about-img-4')?.value || ''
       ];
+      activeContent.about.collageImages = abImgs;
+      abImgs.forEach(url => { if (url) addRecentMedia(url, 'image'); });
 
       // Gather Films
       const filmBoxes = document.querySelectorAll('#films-list-container .admin-item-box');
@@ -829,11 +1063,16 @@ function initSaveContent() {
           activeContent.weddingFilms[idx].title = box.querySelector('.film-title')?.value || '';
           activeContent.weddingFilms[idx].location = box.querySelector('.film-location')?.value || '';
           activeContent.weddingFilms[idx].duration = box.querySelector('.film-duration')?.value || '';
-          activeContent.weddingFilms[idx].videoUrl = box.querySelector('.film-videourl')?.value || '';
-          activeContent.weddingFilms[idx].poster = box.querySelector('.film-poster')?.value || '';
+          const vUrl = box.querySelector('.film-videourl')?.value || '';
+          const pUrl = box.querySelector('.film-poster')?.value || '';
+          activeContent.weddingFilms[idx].videoUrl = vUrl;
+          activeContent.weddingFilms[idx].poster = pUrl;
           activeContent.weddingFilms[idx].reviewQuote = box.querySelector('.film-review')?.value || '';
           const stillsStr = box.querySelector('.film-stills')?.value || '';
           activeContent.weddingFilms[idx].stills = stillsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+          if (vUrl) addRecentMedia(vUrl, 'video');
+          if (pUrl) addRecentMedia(pUrl, 'image');
         }
       });
 
@@ -844,26 +1083,33 @@ function initSaveContent() {
           activeContent.portfolio[idx].title = box.querySelector('.port-title')?.value || '';
           activeContent.portfolio[idx].category = box.querySelector('.port-category')?.value || 'stories';
           activeContent.portfolio[idx].aspectRatio = box.querySelector('.port-aspect')?.value || '4/5';
-          activeContent.portfolio[idx].image = box.querySelector('.port-image')?.value || '';
-          activeContent.portfolio[idx].videoUrl = box.querySelector('.port-videourl')?.value || '';
+          const pImg = box.querySelector('.port-image')?.value || '';
+          const pVid = box.querySelector('.port-videourl')?.value || '';
+          activeContent.portfolio[idx].image = pImg;
+          activeContent.portfolio[idx].videoUrl = pVid;
           
           if (!activeContent.portfolio[idx].exif) activeContent.portfolio[idx].exif = {};
           activeContent.portfolio[idx].exif.camera = box.querySelector('.port-camera')?.value || 'Leica M11';
           activeContent.portfolio[idx].exif.lens = box.querySelector('.port-lens')?.value || 'Noctilux-M 50mm';
           activeContent.portfolio[idx].exif.aperture = box.querySelector('.port-aperture')?.value || 'f/1.2';
           activeContent.portfolio[idx].exif.focal = box.querySelector('.port-focal')?.value || '50mm';
+
+          if (pImg) addRecentMedia(pImg, 'image');
+          if (pVid) addRecentMedia(pVid, 'video');
         }
       });
 
       // Gather Founders Story (Card 5)
       if (!activeContent.foundersStory) activeContent.foundersStory = {};
       activeContent.foundersStory.title = document.getElementById('story-title-input')?.value || '';
-      activeContent.foundersStory.foundersImage = document.getElementById('story-img-input')?.value || '';
+      const storyImgUrl = document.getElementById('story-img-input')?.value || '';
+      activeContent.foundersStory.foundersImage = storyImgUrl;
       activeContent.foundersStory.paragraphs = [
         document.getElementById('story-p1-input')?.value || '',
         document.getElementById('story-p2-input')?.value || '',
         document.getElementById('story-p3-input')?.value || ''
       ];
+      if (storyImgUrl) addRecentMedia(storyImgUrl, 'image');
 
       // Gather Footer (Card 6)
       if (!activeContent.footer) activeContent.footer = {};
@@ -933,5 +1179,6 @@ function showToast(msg) {
 document.addEventListener('DOMContentLoaded', () => {
   initAdminAuth();
   initAdminTabs();
+  initMediaModal();
   initSaveContent();
 });
