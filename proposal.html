@@ -487,6 +487,10 @@
     </div>
 
     <div class="proposal-nav-actions">
+      <button type="button" class="nav-btn nav-btn-outline" id="nav-btn-media-customizer">
+        🎨 Change Photos & Video
+      </button>
+
       <button type="button" class="nav-btn nav-btn-gold" id="nav-btn-pdf">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Download PDF
@@ -505,6 +509,9 @@
 
   <!-- MOBILE FLOATING GLASS ACTION BAR -->
   <div class="mobile-floating-bar">
+    <button type="button" class="nav-btn nav-btn-outline" id="nav-btn-media-mobile">
+      🎨 Media
+    </button>
     <button type="button" class="nav-btn nav-btn-outline" id="nav-btn-pdf-mobile">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       PDF
@@ -905,6 +912,63 @@
       <button type="button" class="nav-btn nav-btn-gold" id="btn-modal-close" style="width: 100%; justify-content: center; padding: 0.8rem; font-size: 0.95rem;">
         Done / Return to Proposal
       </button>
+    </div>
+  </div>
+
+  <!-- MEDIA CUSTOMIZER MODAL (PICTURES & VIDEO SELECTOR) -->
+  <div class="modal-overlay" id="media-customizer-modal">
+    <div class="modal-card" style="max-width: 620px; text-align: left; background: #141312; border: 1.5px solid var(--gold-accent);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--gold-border); padding-bottom: 0.75rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--gold-accent); margin: 0;">
+          🎨 Customize Pictures & Video Showcase
+        </h3>
+        <button type="button" id="btn-close-media-customizer" style="background: none; border: none; color: #FFF; font-size: 1.2rem; cursor: pointer; padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: #A1A1AA; margin-bottom: 1.25rem;">
+        Select preset photography sets or enter custom image & video URLs for this quotation.
+      </p>
+
+      <!-- PRESET THEME SELECTOR -->
+      <div style="margin-bottom: 1.5rem;">
+        <label style="font-size: 0.72rem; color: var(--gold-accent); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 0.65rem;">Select Preset Theme Set</label>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem;" id="media-theme-chips">
+          <button type="button" class="theme-chip-btn active" data-theme="set1" style="background: rgba(197, 160, 89, 0.2); border: 1px solid var(--gold-accent); color: #FFF; padding: 0.65rem 0.5rem; border-radius: 8px; font-size: 0.76rem; font-weight: 600; cursor: pointer; text-align: center;">
+            ✨ Set 1: Fine Art Shrine
+          </button>
+          <button type="button" class="theme-chip-btn" data-theme="set2" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #CCC; padding: 0.65rem 0.5rem; border-radius: 8px; font-size: 0.76rem; font-weight: 600; cursor: pointer; text-align: center;">
+            🌺 Set 2: Sacred Rituals
+          </button>
+          <button type="button" class="theme-chip-btn" data-theme="set3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #CCC; padding: 0.65rem 0.5rem; border-radius: 8px; font-size: 0.76rem; font-weight: 600; cursor: pointer; text-align: center;">
+            👑 Set 3: Royal Portraits
+          </button>
+        </div>
+      </div>
+
+      <!-- CUSTOM IMAGE & VIDEO INPUTS -->
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
+        <div>
+          <label style="font-size: 0.75rem; color: #E4E4E7; font-weight: 600; display: block; margin-bottom: 0.25rem;">Featured 4K Video URL (.mp4)</label>
+          <input type="text" id="cust-video-url" style="width: 100%; background: #1A1816; color: #FFF; border: 1px solid rgba(197, 160, 89, 0.35); border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.85rem; box-sizing: border-box;" value="./videos/hero-wedding.mp4">
+        </div>
+        <div>
+          <label style="font-size: 0.75rem; color: #E4E4E7; font-weight: 600; display: block; margin-bottom: 0.25rem;">About Us Top Photo URL</label>
+          <input type="text" id="cust-about-top" style="width: 100%; background: #1A1816; color: #FFF; border: 1px solid rgba(197, 160, 89, 0.35); border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.85rem; box-sizing: border-box;" value="./images/niharika/doorway-portrait.jpg">
+        </div>
+        <div>
+          <label style="font-size: 0.75rem; color: #E4E4E7; font-weight: 600; display: block; margin-bottom: 0.25rem;">About Us Bottom Photo URL</label>
+          <input type="text" id="cust-about-bottom" style="width: 100%; background: #1A1816; color: #FFF; border: 1px solid rgba(197, 160, 89, 0.35); border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.85rem; box-sizing: border-box;" value="./images/niharika/pooja-prayer.jpg">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="button" class="nav-btn nav-btn-gold" id="btn-apply-media-customizer" style="flex: 1; justify-content: center; padding: 0.75rem; font-size: 0.85rem;">
+          ✨ Apply to Quotation Page
+        </button>
+        <button type="button" class="nav-btn nav-btn-outline" id="btn-copy-media-link" style="flex: 1; justify-content: center; padding: 0.75rem; font-size: 0.85rem;">
+          🔗 Copy Custom Link
+        </button>
+      </div>
     </div>
   </div>
 
