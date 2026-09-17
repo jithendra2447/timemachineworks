@@ -1049,30 +1049,37 @@ function renderProposalPreview() {
     // TEMPLATE 2: MODERN DARK GLASSMORPHISM LUXURY TEMPLATE
     // =========================================================================
     const eventsDarkHtml = activeQuotation.events.map(e => {
-      const crewParts = [];
-      if (e.candidPhoto) crewParts.push(`${e.candidPhoto} Candid Photo`);
-      if (e.candidVideo) crewParts.push(`${e.candidVideo} Candid Video`);
-      if (e.tradPhoto) crewParts.push(`${e.tradPhoto} Trad Photo`);
-      if (e.tradVideo) crewParts.push(`${e.tradVideo} Trad Video`);
-      if (e.dronePilot) crewParts.push(`${e.dronePilot} Drone`);
+      const crewChips = [];
+      if (e.candidPhoto) crewChips.push(`<span class="proposal-crew-chip">📸 ${e.candidPhoto} Candid Photo${e.candidPhoto > 1 ? 's' : ''}</span>`);
+      if (e.candidVideo) crewChips.push(`<span class="proposal-crew-chip">🎬 ${e.candidVideo} Candid Video${e.candidVideo > 1 ? 's' : ''}</span>`);
+      if (e.tradPhoto) crewChips.push(`<span class="proposal-crew-chip">📷 ${e.tradPhoto} Trad Photo${e.tradPhoto > 1 ? 's' : ''}</span>`);
+      if (e.tradVideo) crewChips.push(`<span class="proposal-crew-chip">🎥 ${e.tradVideo} Trad Video${e.tradVideo > 1 ? 's' : ''}</span>`);
+      if (e.dronePilot) crewChips.push(`<span class="proposal-crew-chip">🚁 ${e.dronePilot} Drone Pilot${e.dronePilot > 1 ? 's' : ''}</span>`);
 
       const badgesHtml = Array.isArray(e.badges) && e.badges.length > 0 ? `
-        <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.75rem;">
-          ${e.badges.map(b => `<span class="proposal-dark-badge" style="font-size: 0.68rem; padding: 0.15rem 0.5rem;">✨ ${b}</span>`).join('')}
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid rgba(245, 158, 11, 0.15);">
+          ${e.badges.map(b => `<span class="proposal-dark-badge" style="font-size: 0.68rem; padding: 0.2rem 0.6rem;">✨ ${b}</span>`).join('')}
         </div>
       ` : '';
 
       return `
-        <div class="proposal-glass-card">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-            <h4 style="font-family: var(--font-heading); font-size: 1.25rem; color: #F4F4F5; margin: 0 0 0.2rem 0; font-weight: 600;">${e.name || 'Event Title'}</h4>
-            <span class="proposal-dark-badge">🗓️ ${e.date || 'Date'}</span>
-          </div>
-          <div style="font-size: 0.85rem; color: #F59E0B; font-family: var(--font-ui); font-weight: 600; margin-bottom: 0.75rem;">
-            📍 ${e.location || 'Location'}
-          </div>
-          <div style="font-size: 0.82rem; color: #A1A1AA; border-top: 1px solid rgba(245, 158, 11, 0.15); padding-top: 0.65rem;">
-            <strong style="color: #F4F4F5;">Dedicated Crew:</strong> ${crewParts.join(' • ')}
+        <div class="proposal-glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.35rem; color: #FFFFFF; margin: 0; font-weight: 600; letter-spacing: -0.01em;">${e.name || 'Event Title'}</h4>
+              <span class="proposal-dark-badge">🗓️ ${e.date || 'Date'}</span>
+            </div>
+            
+            <div style="font-size: 0.88rem; color: #F59E0B; font-family: var(--font-ui); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.35rem;">
+              📍 ${e.location || 'Location'}
+            </div>
+
+            <div style="margin-bottom: 0.5rem;">
+              <div style="font-size: 0.75rem; font-family: var(--font-ui); text-transform: uppercase; letter-spacing: 0.1em; color: #A1A1AA; margin-bottom: 0.45rem; font-weight: 600;">Dedicated Crew Breakdown</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                ${crewChips.join('') || '<span style="font-size:0.8rem; color:#71717A;">Standard Crew</span>'}
+              </div>
+            </div>
           </div>
           ${badgesHtml}
         </div>
@@ -1080,127 +1087,131 @@ function renderProposalPreview() {
     }).join('');
 
     container.innerHTML = `
-      <!-- 1. HERO HEADER -->
-      <div style="margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(245, 158, 11, 0.2);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+      <!-- 1. HERO HEADER WITH EDITORIAL LOCKUP -->
+      <div style="margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(245, 158, 11, 0.2); position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.25rem;">
           <div>
-            <div class="proposal-dark-badge" style="margin-bottom: 0.6rem;">LUXURY GLASSMORPHISM PROPOSAL</div>
-            <h1 style="font-family: var(--font-heading); font-size: 2.2rem; color: #FFFFFF; margin: 0; font-weight: 400; letter-spacing: 0.02em;">
+            <div class="proposal-dark-badge" style="margin-bottom: 0.75rem;">✦ LUXURY GLASSMORPHISM PROPOSAL ✦</div>
+            <h1 style="font-family: var(--font-heading); font-size: 2.5rem; margin: 0; font-weight: 400; letter-spacing: -0.02em;" class="proposal-gold-text">
               Timemachine & Co.
             </h1>
-            <p style="font-size: 0.9rem; color: #F59E0B; font-family: var(--font-ui); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 0.25rem;">
+            <p style="font-size: 0.95rem; color: #F59E0B; font-family: var(--font-ui); letter-spacing: 0.14em; text-transform: uppercase; margin-top: 0.35rem; font-style: italic;">
               "Because Every Frame Has a Story to Tell"
             </p>
           </div>
-          <div style="text-align: right; font-size: 0.82rem; color: #A1A1AA; font-family: var(--font-ui);">
-            <div style="color: #FBBF24; font-weight: 600;">📞 +91 97056 32982</div>
-            <div>🌐 timemachineworks.com</div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; font-family: var(--font-ui);">
+            <div class="proposal-crew-chip" style="background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.4); color: #FBBF24; font-weight: 700;">
+              📞 +91 97056 32982
+            </div>
+            <div class="proposal-crew-chip" style="background: rgba(24, 24, 27, 0.8); border-color: rgba(255, 255, 255, 0.1); color: #A1A1AA;">
+              🌐 timemachineworks.com
+            </div>
           </div>
         </div>
 
-        <!-- Personalized Welcome Banner -->
-        <div class="proposal-glass-card" style="margin-top: 2rem; text-align: center; border-color: rgba(245, 158, 11, 0.4); background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(24, 24, 27, 0.8) 100%);">
-          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #FBBF24; font-weight: 700;">PROPOSAL PREPARED ESPECIALLY FOR</span>
-          <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #FFFFFF; margin: 0.3rem 0 0.2rem 0;">${activeQuotation.clientName || 'Bhavya Allu'}</h2>
-          <p style="font-size: 0.92rem; color: #D4D4D8; margin: 0.2rem 0 0.8rem 0;">${activeQuotation.coupleNames || ''}</p>
-          <div style="font-size: 0.82rem; color: #F59E0B; font-family: var(--font-ui); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
-            ✨ Celebrating Your Wedding Story &nbsp;•&nbsp; 🗓️ ${datesSummary}
+        <!-- Personalized Welcome Experience Card -->
+        <div class="proposal-glass-card" style="margin-top: 2rem; text-align: center; border-color: rgba(245, 158, 11, 0.45); background: linear-gradient(145deg, rgba(245, 158, 11, 0.12) 0%, rgba(24, 24, 27, 0.9) 100%);">
+          <span style="font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: #FBBF24; font-weight: 700;">PROPOSAL PREPARED ESPECIALLY FOR</span>
+          <h2 style="font-family: var(--font-heading); font-size: 2.2rem; color: #FFFFFF; margin: 0.35rem 0 0.2rem 0; font-style: italic;">${activeQuotation.clientName || 'Bhavya Allu'}</h2>
+          <p style="font-size: 0.95rem; color: #D4D4D8; margin: 0.2rem 0 0.85rem 0;">${activeQuotation.coupleNames || 'Groom: Anish • Bride: Bhavya Allu'}</p>
+          <div style="font-size: 0.82rem; color: #F59E0B; font-family: var(--font-ui); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(245, 158, 11, 0.1); padding: 0.4rem 1rem; border-radius: 999px; border: 1px solid rgba(245, 158, 11, 0.3);">
+            ✨ CELEBRATING YOUR WEDDING STORY &nbsp;•&nbsp; 🗓️ ${datesSummary}
           </div>
         </div>
       </div>
 
-      <!-- 2. EVENT SCHEDULE (ANIMATED CARDS) -->
-      <div style="margin-bottom: 3rem;">
-        <div style="text-align: center; margin-bottom: 1.75rem;">
-          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">CELEBRATION SCHEDULE</span>
-          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #FFFFFF; margin-top: 0.2rem; font-weight: 400;">Event Schedule & Crew Breakdown</h3>
+      <!-- 2. EVENT SCHEDULE -->
+      <div style="margin-bottom: 3.25rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">CELEBRATION SCHEDULE</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.8rem; color: #FFFFFF; margin-top: 0.25rem; font-weight: 400;">Event Schedule & Crew Breakdown</h3>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.35rem;">
           ${eventsDarkHtml}
         </div>
       </div>
 
       <!-- 3. CORE DELIVERABLES GRID -->
-      <div style="margin-bottom: 3rem;">
-        <div style="text-align: center; margin-bottom: 1.75rem;">
-          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">EDITORIAL OUTPUTS</span>
-          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #FFFFFF; margin-top: 0.2rem; font-weight: 400;">Core Deliverables Archive</h3>
+      <div style="margin-bottom: 3.25rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">EDITORIAL OUTPUTS</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.8rem; color: #FFFFFF; margin-top: 0.25rem; font-weight: 400;">Core Deliverables Archive</h3>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.35rem;">
           <div class="proposal-glass-card">
-            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">📸</div>
-            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">1,000 Edited Images</h4>
-            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">60-day cloud gallery delivery with signature color grading & high-res printing rights.</p>
+            <div style="font-size: 1.8rem; margin-bottom: 0.6rem; color: #FBBF24;">📸</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #FFFFFF; margin: 0 0 0.35rem 0;">1,000 Edited Stills</h4>
+            <p style="font-size: 0.85rem; color: #A1A1AA; margin: 0; line-height: 1.6;">60-day cloud gallery delivery with signature color grading & high-res printing rights.</p>
           </div>
 
           <div class="proposal-glass-card">
-            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🎬</div>
-            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">Cinematic HD Film</h4>
-            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">4K Teaser & Feature Film (60-day delivery, 1 round of revisions included).</p>
+            <div style="font-size: 1.8rem; margin-bottom: 0.6rem; color: #FBBF24;">🎬</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #FFFFFF; margin: 0 0 0.35rem 0;">Cinematic HD Film</h4>
+            <p style="font-size: 0.85rem; color: #A1A1AA; margin: 0; line-height: 1.6;">4K Teaser & Feature Film (60-day delivery, 1 round of revisions included).</p>
           </div>
 
           <div class="proposal-glass-card">
-            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🎥</div>
-            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">Traditional Film</h4>
-            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">Full uncut documentary video coverage of ceremony proceedings (75-day delivery).</p>
+            <div style="font-size: 1.8rem; margin-bottom: 0.6rem; color: #FBBF24;">🎥</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #FFFFFF; margin: 0 0 0.35rem 0;">Traditional Film</h4>
+            <p style="font-size: 0.85rem; color: #A1A1AA; margin: 0; line-height: 1.6;">Full uncut documentary video coverage of ceremony proceedings (75-day delivery).</p>
           </div>
 
           <div class="proposal-glass-card">
-            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">📖</div>
-            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">3 Signature Albums</h4>
-            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">Handcrafted fine-art printed albums (40 sheets each; extra sheets @ ₹600/sheet).</p>
+            <div style="font-size: 1.8rem; margin-bottom: 0.6rem; color: #FBBF24;">📖</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #FFFFFF; margin: 0 0 0.35rem 0;">3 Signature Albums</h4>
+            <p style="font-size: 0.85rem; color: #A1A1AA; margin: 0; line-height: 1.6;">Handcrafted fine-art printed albums (40 sheets each; extra sheets @ ₹600/sheet).</p>
           </div>
         </div>
       </div>
 
       <!-- 4. REAL-TIME DYNAMIC PRICE CALCULATOR -->
-      <div style="margin-bottom: 3rem;">
+      <div style="margin-bottom: 3.25rem;">
         <div class="proposal-dark-price-box">
-          <span style="font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: #FBBF24; font-weight: 700;">DYNAMIC INVESTMENT CALCULATOR</span>
-          <p style="font-size: 1rem; color: #E4E4E7; margin: 0.6rem 0 0.2rem 0; font-family: var(--font-paragraph);">
+          <span style="font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; color: #FBBF24; font-weight: 800;">DYNAMIC INVESTMENT CALCULATOR</span>
+          <p style="font-size: 1.05rem; color: #E4E4E7; margin: 0.75rem 0 0.25rem 0; font-family: var(--font-paragraph);">
             Dear <strong style="color: #FFFFFF;">${activeQuotation.clientName || 'Bhavya Allu'}</strong>, your calculated total investment is:
           </p>
           
           <div class="proposal-dark-price-val">₹ ${calculatedTotal}</div>
           
-          <div style="font-size: 0.82rem; color: #A1A1AA; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-            <span>Base Package: ₹${activeQuotation.totalPrice || '2,50,000'}</span>
-            ${activeQuotation.addOns.ledWall ? `<span style="color: #FBBF24;">+ LED Wall (₹25k)</span>` : ''}
-            ${activeQuotation.addOns.liveStream ? `<span style="color: #FBBF24;">+ Live Stream (₹15k)</span>` : ''}
-            ${activeQuotation.addOns.droneCoverage ? `<span style="color: #FBBF24;">+ Drone (₹15k)</span>` : ''}
-            ${activeQuotation.addOns.extraAlbums > 0 ? `<span style="color: #FBBF24;">+ ${activeQuotation.addOns.extraAlbums} Extra Album(s)</span>` : ''}
+          <div style="font-size: 0.85rem; color: #A1A1AA; margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+            <span class="proposal-crew-chip">Base Package: ₹${activeQuotation.totalPrice || '2,50,000'}</span>
+            ${activeQuotation.addOns.ledWall ? `<span class="proposal-crew-chip" style="color:#FBBF24; border-color:#F59E0B;">+ LED Wall (₹25k)</span>` : ''}
+            ${activeQuotation.addOns.liveStream ? `<span class="proposal-crew-chip" style="color:#FBBF24; border-color:#F59E0B;">+ Live Stream (₹15k)</span>` : ''}
+            ${activeQuotation.addOns.droneCoverage ? `<span class="proposal-crew-chip" style="color:#FBBF24; border-color:#F59E0B;">+ Drone (₹15k)</span>` : ''}
+            ${activeQuotation.addOns.extraAlbums > 0 ? `<span class="proposal-crew-chip" style="color:#FBBF24; border-color:#F59E0B;">+ ${activeQuotation.addOns.extraAlbums} Extra Album(s)</span>` : ''}
           </div>
         </div>
       </div>
 
       <!-- 5. TERMS & POLICIES -->
-      <div style="margin-bottom: 3rem;">
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">TRANSPARENT TERMS</span>
-          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #FFFFFF; margin-top: 0.2rem; font-weight: 400;">Terms & Policies</h3>
+      <div style="margin-bottom: 3.25rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">TRANSPARENT TERMS</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.8rem; color: #FFFFFF; margin-top: 0.25rem; font-weight: 400;">Terms & Policies</h3>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
-          <div class="proposal-glass-card" style="font-size: 0.85rem;">
-            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">✈️ Travel & Accommodations</strong>
-            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">Travel & stay to be arranged by client for events outside Hyderabad.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem;">
+          <div class="proposal-glass-card" style="font-size: 0.88rem;">
+            <strong style="color: #FBBF24; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">✈️ Travel & Accommodations</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.6;">Travel & stay to be arranged by client for events outside Hyderabad.</p>
           </div>
 
-          <div class="proposal-glass-card" style="font-size: 0.85rem;">
-            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">💳 Payment Retainer Schedule</strong>
-            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">50% booking retainer, 50% balance prior to raw footage handover.</p>
+          <div class="proposal-glass-card" style="font-size: 0.88rem;">
+            <strong style="color: #FBBF24; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">💳 Payment Retainer Schedule</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.6;">50% booking retainer, 50% balance prior to raw footage handover.</p>
           </div>
 
-          <div class="proposal-glass-card" style="font-size: 0.85rem;">
-            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">💾 Data Safety & Storage</strong>
-            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">Requirement of two 4TB external hard drives for client data safety.</p>
+          <div class="proposal-glass-card" style="font-size: 0.88rem;">
+            <strong style="color: #FBBF24; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">💾 Data Safety & Storage</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.6;">Requirement of two 4TB external hard drives for client data safety.</p>
           </div>
 
-          <div class="proposal-glass-card" style="font-size: 0.85rem;">
-            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">🔒 Non-Refundable Policy</strong>
-            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">Booking retainers are non-refundable upon cancellation.</p>
+          <div class="proposal-glass-card" style="font-size: 0.88rem;">
+            <strong style="color: #FBBF24; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">🔒 Non-Refundable Policy</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.6;">Booking retainers are non-refundable upon cancellation.</p>
           </div>
         </div>
       </div>
@@ -1210,7 +1221,7 @@ function renderProposalPreview() {
         <button type="button" class="proposal-accept-btn" id="btn-accept-proposal">
           ✨ Accept Proposal & Reserve Date
         </button>
-        <p style="font-size: 0.78rem; color: #71717A; margin-top: 0.75rem;">
+        <p style="font-size: 0.8rem; color: #71717A; margin-top: 0.85rem; font-family: var(--font-ui);">
           Clicking reserves your dates & notifies lead cinematographer via instant dispatch.
         </p>
       </div>
