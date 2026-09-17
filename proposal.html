@@ -130,6 +130,136 @@
       transform: translateY(-2px);
     }
 
+    /* MAIN PROPOSAL SHEETS & SLICES */
+    .proposal-outer-wrapper {
+      max-width: 980px;
+      margin: 2.5rem auto 6rem auto;
+      padding: 0 1.5rem;
+      box-sizing: border-box;
+    }
+
+    .proposal-document-sheet {
+      background: #FAF7F2;
+      border-radius: 20px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(197, 160, 89, 0.2);
+      padding: 4rem 3.5rem;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .proposal-page-slice {
+      position: relative;
+      padding-bottom: 4rem;
+      margin-bottom: 4rem;
+      border-bottom: 1px solid rgba(197, 160, 89, 0.25);
+      clear: both;
+      display: block;
+    }
+
+    .proposal-page-slice:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    /* SERVICE & EVENT CARDS */
+    .service-card {
+      background: #F3EBDD;
+      border: 1px solid rgba(197, 160, 89, 0.35);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .service-card:hover {
+      border-color: #C5A059;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    }
+
+    /* ACCEPTANCE CONFIRMATION MODAL OVERLAY */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 999999 !important;
+      background: rgba(10, 9, 8, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #181716;
+      border: 1.5px solid rgba(197, 160, 89, 0.4);
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 2.25rem 2rem;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+      transform: scale(0.92);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    /* ABOUT US PHOTOS DISPLAY SYSTEM */
+    .about-split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .about-photos-container {
+      position: relative;
+      height: 400px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .about-photo-top {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 65%;
+      height: 220px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.14);
+      z-index: 2;
+      border: 1px solid #EAE3D2;
+    }
+
+    .about-photo-bottom {
+      position: absolute;
+      top: 100px;
+      left: 0;
+      width: 58%;
+      height: 290px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+      z-index: 3;
+      border: 2px solid #FFFFFF;
+    }
+
     /* 3D ARC GALLERY */
     .gallery-arc-container {
       perspective: 1000px;
@@ -139,7 +269,7 @@
       justify-content: center !important;
       align-items: center !important;
       gap: 0.6rem !important;
-      margin: 2rem auto !important;
+      margin: 2.5rem auto !important;
       padding: 1.5rem 0 !important;
       width: 100% !important;
       max-width: 100% !important;
@@ -167,14 +297,14 @@
       display: none;
     }
 
-    /* FULL RESPONSIVE MEDIA QUERIES FOR MOBILE, TABLET & DESKTOP */
+    /* FULL RESPONSIVE MEDIA QUERIES FOR MOBILE & TABLET */
     @media (max-width: 900px) {
       .proposal-navbar {
         padding: 0.85rem 1.25rem;
       }
 
       .proposal-nav-actions {
-        display: none !important; /* Hide header buttons on mobile, replace with floating glass bar */
+        display: none !important;
       }
 
       .mobile-floating-bar {
@@ -205,12 +335,17 @@
 
       .proposal-outer-wrapper {
         margin: 1rem auto;
-        padding: 0 0.5rem 2rem 0.5rem;
+        padding: 0 0.5rem 7rem 0.5rem !important;
       }
 
       .proposal-document-sheet {
-        padding: 2rem 1.25rem;
-        border-radius: 12px;
+        padding: 2.25rem 1.25rem;
+        border-radius: 14px;
+      }
+
+      .proposal-page-slice {
+        padding-bottom: 3rem;
+        margin-bottom: 3rem;
       }
 
       .feature-summary-grid {
@@ -232,11 +367,27 @@
 
       .about-split-grid {
         grid-template-columns: 1fr !important;
-        gap: 2.5rem !important;
+        gap: 2rem !important;
       }
 
       .about-photos-container {
-        height: 300px !important;
+        height: 280px !important;
+        max-width: 440px;
+        margin: 0 auto 1rem auto;
+      }
+
+      .about-photo-top {
+        width: 65% !important;
+        height: 180px !important;
+        top: 0 !important;
+        right: 0 !important;
+      }
+
+      .about-photo-bottom {
+        width: 60% !important;
+        height: 220px !important;
+        top: 50px !important;
+        left: 0 !important;
       }
 
       .contact-cards-grid {
@@ -246,25 +397,45 @@
     }
 
     @media (max-width: 640px) {
+      .proposal-document-sheet {
+        padding: 1.75rem 1rem;
+      }
+
       .gallery-arc-container {
         perspective: none !important;
-        gap: 0.3rem !important;
+        gap: 0.35rem !important;
         overflow-x: auto !important;
         justify-content: flex-start !important;
-        padding: 1rem 0.5rem !important;
+        padding: 0.75rem 0.25rem !important;
+        margin: 1.25rem auto !important;
         -webkit-overflow-scrolling: touch;
       }
 
       .gallery-arc-card {
         transform: none !important;
-        width: 110px !important;
-        height: 190px !important;
+        width: 105px !important;
+        height: 180px !important;
         border-radius: 12px !important;
         flex-shrink: 0 !important;
       }
 
+      .about-photos-container {
+        height: 230px !important;
+      }
+
+      .about-photo-top {
+        width: 68% !important;
+        height: 150px !important;
+      }
+
+      .about-photo-bottom {
+        width: 62% !important;
+        height: 180px !important;
+        top: 40px !important;
+      }
+
       #live-total-price {
-        font-size: 2.5rem !important;
+        font-size: 2.4rem !important;
       }
     }
 
@@ -427,25 +598,25 @@
            PAGE 2: ABOUT US (Matching User Reference Image 2)
            =================================================================== -->
       <section class="proposal-page-slice" id="slice-about">
-        <div class="about-split-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center;">
+        <div class="about-split-grid">
           <!-- Left Overlapping Photos Block -->
-          <div class="about-photos-container" style="position: relative; height: 380px; width: 100%;">
+          <div class="about-photos-container">
             <!-- Accent Line behind images -->
-            <div style="position: absolute; left: 0; top: 40%; width: 100%; height: 1px; background: var(--gold-accent); opacity: 0.5; z-index: 1;"></div>
+            <div style="position: absolute; left: 0; top: 40%; width: 100%; height: 1px; background: var(--gold-accent); opacity: 0.4; z-index: 1;"></div>
             
             <!-- Top Right Horizontal Floating Image -->
-            <div style="position: absolute; top: 0; right: 5%; width: 62%; height: 200px; border-radius: 16px; overflow: hidden; box-shadow: 0 14px 35px rgba(0,0,0,0.14); z-index: 2; border: 1px solid #EAE3D2;">
+            <div class="about-photo-top">
               <img src="./images/niharika/doorway-portrait.jpg" alt="About Showcase 1" style="width:100%; height:100%; object-fit:cover;">
             </div>
 
             <!-- Bottom Left Vertical Floating Image -->
-            <div style="position: absolute; top: 80px; left: 2%; width: 55%; height: 280px; border-radius: 16px; overflow: hidden; box-shadow: 0 18px 45px rgba(0,0,0,0.18); z-index: 3; border: 2px solid #FFFFFF;">
+            <div class="about-photo-bottom">
               <img src="./images/niharika/pooja-prayer.jpg" alt="About Showcase 2" style="width:100%; height:100%; object-fit:cover;">
             </div>
           </div>
 
           <!-- Right Text Content Block -->
-          <div style="padding-left: 1rem;">
+          <div style="padding-left: 0.5rem;">
             <div style="font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-accent); font-weight: 700; margin-bottom: 0.4rem;">
               OUR CINEMATIC JOURNEY
             </div>
@@ -658,7 +829,7 @@
           </h3>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; width: 100%; max-width: 100%; box-sizing: border-box; margin-bottom: 2.5rem;">
+        <div class="contact-cards-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; width: 100%; max-width: 100%; box-sizing: border-box; margin-bottom: 2.5rem;">
           <!-- CLICKABLE PHONE / WHATSAPP -->
           <a href="https://wa.me/919705632982" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; text-align: center; background: #F3EBDD; border: 1px solid var(--gold-border); border-radius: 12px; padding: 1.5rem; transition: transform 0.2s ease, box-shadow 0.2s ease;">
             <div style="width: 46px; height: 46px; border-radius: 50%; background: #1A1816; color: var(--gold-accent); display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.12);">

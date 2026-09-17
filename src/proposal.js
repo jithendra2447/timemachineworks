@@ -90,17 +90,22 @@ function initAcceptProposal() {
   const acceptBtns = [document.getElementById('nav-btn-accept'), document.getElementById('nav-btn-accept-mobile')].filter(Boolean);
   const modal = document.getElementById('accept-modal-overlay');
   const closeBtn = document.getElementById('btn-modal-close');
+  const mobileBar = document.querySelector('.mobile-floating-bar');
 
   acceptBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       triggerGoldConfetti();
       if (modal) modal.classList.add('active');
+      if (mobileBar) mobileBar.style.display = 'none';
     });
   });
 
   if (closeBtn && modal) {
     closeBtn.addEventListener('click', () => {
       modal.classList.remove('active');
+      if (mobileBar && window.innerWidth <= 900) {
+        mobileBar.style.display = 'flex';
+      }
     });
   }
 }
