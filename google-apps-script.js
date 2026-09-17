@@ -1,19 +1,15 @@
 /**
  * Timemachine & Co - Google Apps Script Webhook
  * 
- * INSTRUCTIONS TO SET UP:
- * 1. Open Google Sheets (https://sheets.new)
- * 2. Click Extensions > Apps Script
- * 3. Delete any existing code and paste this ENTIRE file into the editor.
+ * INSTRUCTIONS TO UPDATE IN GOOGLE APPS SCRIPT:
+ * 1. Open your Google Sheet.
+ * 2. Click Extensions > Apps Script.
+ * 3. Replace the code with this updated code.
  * 4. Click 'Save' (Ctrl+S or Cmd+S).
- * 5. Click 'Deploy' > 'New deployment'.
- * 6. Select Type: 'Web app'.
- * 7. Description: 'Timemachine Quote Webhook'.
- * 8. Execute as: 'Me'.
- * 9. Who has access: 'Anyone'.
- * 10. Click 'Deploy', authorize access, and copy the Web App URL!
- * 11. Paste the Web App URL into your .env file as:
- *     GOOGLE_SHEET_WEBHOOK_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+ * 5. Click 'Deploy' > 'Manage deployments'.
+ * 6. Click the edit pencil icon next to your active Web App deployment.
+ * 7. Change Version to 'New version'.
+ * 8. Click 'Deploy'.
  */
 
 function doPost(e) {
@@ -34,7 +30,8 @@ function doPost(e) {
         "Location",
         "No. of Guests"
       ]);
-      sheet.getRange(1, 1, 1, 10).setFontWeight("bold").setBackground("#1C1C1E").setFontColor("#FFFFFF");
+      sheet.getRange(1, 1, 1, 10).setFontWeight("bold").setBackground("#1A1816").setFontColor("#FFFFFF");
+      sheet.getRange("E:E").setNumberFormat("@"); // Set Column E (Phone Number) as Plain Text
     }
 
     var data = JSON.parse(e.postData.contents);
@@ -42,7 +39,11 @@ function doPost(e) {
     var clientName = data.clientName || "";
     var groomName = data.groomName || "";
     var brideName = data.brideName || "";
-    var phone = (data.countryCode || "") + " " + (data.phone || "");
+    
+    // Format phone with single quote prefix so Google Sheets doesn't parse '+91...' as a math formula (#ERROR!)
+    var rawPhone = ((data.countryCode || "") + " " + (data.phone || "")).trim();
+    var phone = "'" + rawPhone;
+
     var events = data.events || [];
 
     // Append one row per event in the itinerary

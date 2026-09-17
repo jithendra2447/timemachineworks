@@ -126,42 +126,50 @@ app.post(['/api/quote', '/quote', '/api/quote.js'], async (req, res) => {
     const savedQuote = await quoteDoc.save();
     console.log('💾 Quote saved successfully to MongoDB Atlas with ID:', savedQuote._id);
 
-    // Google Sheets Webhook Dispatch (Async & Resilient)
+    // Google Sheets Webhook Dispatch (Async & Resilient with 302 Redirect Support)
     if (GOOGLE_SHEET_WEBHOOK_URL) {
       try {
         console.log('🚀 Forwarding quote payload to Google Sheets webhook...');
         const https = await import('https');
         const agent = new https.Agent({ rejectUnauthorized: false });
+        const bodyPayload = JSON.stringify(newQuoteData);
         
-        const postToSheet = (url, bodyData) => {
+        const sendToSheet = (targetUrl, method = 'POST') => {
           try {
-            const req = https.request(url, {
-              method: 'POST',
+            const options = {
+              method,
               agent,
-              headers: {
+              headers: method === 'POST' ? {
                 'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(bodyData)
-              }
-            }, (res) => {
+                'Content-Length': Buffer.byteLength(bodyPayload)
+              } : {}
+            };
+
+            const req = https.request(targetUrl, options, (res) => {
               if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                postToSheet(res.headers.location, bodyData);
+                // Google Apps Script redirects 302 to an echo GET endpoint
+                sendToSheet(res.headers.location, 'GET');
                 return;
               }
-              console.log('✅ Google Sheets webhook response status:', res.statusCode);
+              let resData = '';
+              res.on('data', chunk => resData += chunk);
+              res.on('end', () => console.log('✅ Google Sheets webhook result:', res.statusCode, resData));
             });
-            req.on('error', err => console.warn('⚠️ Google Sheets webhook dispatch warning:', err.message));
-            req.write(bodyData);
+
+            req.on('error', err => console.warn('⚠️ Google Sheets webhook warning:', err.message));
+            if (method === 'POST') req.write(bodyPayload);
             req.end();
           } catch (e) {
             console.warn('⚠️ Google Sheets webhook dispatch error:', e.message);
           }
         };
 
-        postToSheet(GOOGLE_SHEET_WEBHOOK_URL, JSON.stringify(newQuoteData));
+        sendToSheet(GOOGLE_SHEET_WEBHOOK_URL, 'POST');
       } catch (webhookErr) {
         console.warn('⚠️ Google Sheets webhook error:', webhookErr.message);
       }
     }
+
 
 
     res.status(201).json({
