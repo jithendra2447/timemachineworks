@@ -561,43 +561,36 @@ async function loadLeads() {
 // QUOTATION GENERATOR & LUXURY PROPOSAL BUILDER LOGIC
 // ==========================================================================
 let activeQuotation = {
-  clientName: 'Niharika & Anish',
-  coupleNames: 'Groom: Anish • Bride: Niharika',
-  phone: '+91 9876543210',
-  email: 'niharika.anish@wedding.com',
+  selectedTemplate: 'template1', // 'template1' or 'template2'
+  clientName: 'Bhavya Allu',
+  coupleNames: 'Groom: Anish • Bride: Bhavya Allu',
+  phone: '+91 97056 32982',
+  email: 'bhavya.allu@wedding.com',
+  website: 'timemachineworks.com',
   events: [
     {
       id: 'evt-1',
-      name: 'Lakshmi Devi Vratham & Engagement',
-      date: '12 Nov 2026',
-      location: 'Sacred Kalasham Mandapam, Hyderabad',
+      name: 'Engagement Ceremony',
+      date: '11 Feb 2027',
+      location: 'Guntur, Andhra Pradesh',
       candidPhoto: 1,
       candidVideo: 1,
       tradPhoto: 1,
       tradVideo: 1,
-      dronePilot: 0
+      dronePilot: 0,
+      badges: []
     },
     {
       id: 'evt-2',
-      name: 'Sangeeth & Haldi Celebration',
-      date: '13 Nov 2026',
-      location: 'Novotel Convention Centre, Hyderabad',
-      candidPhoto: 2,
-      candidVideo: 2,
-      tradPhoto: 1,
-      tradVideo: 1,
-      dronePilot: 1
-    },
-    {
-      id: 'evt-3',
-      name: 'Grand Wedding & Royal Reception',
-      date: '14 Nov 2026',
-      location: 'Grand Palace Hall, Hyderabad',
+      name: 'Grand Wedding Celebrations',
+      date: '25 Feb 2027',
+      location: 'Hyderabad, Telangana',
       candidPhoto: 2,
       candidVideo: 2,
       tradPhoto: 2,
       tradVideo: 2,
-      dronePilot: 1
+      dronePilot: 1,
+      badges: ['Pellikoduku', 'Bride Ceremony', 'Haldi', 'Sangeeth', 'Mehendi', 'Vratham', 'Wedding']
     }
   ],
   services: {
@@ -606,10 +599,16 @@ let activeQuotation = {
     albums: true,
     videos: true
   },
+  addOns: {
+    ledWall: false,
+    liveStream: false,
+    droneCoverage: false,
+    extraAlbums: 0
+  },
   totalPrice: '2,50,000',
-  advancePct: '50% Advance Upon Booking Confirmation',
-  finalPct: '50% Balance Prior to First Event Date',
-  hdNote: 'Client is required to provide two 4TB high-speed USB-C External Hard Drives for raw footage & master video delivery.'
+  advancePct: '50% Booking Retainer',
+  finalPct: '50% Balance Prior to Raw Footage Handover',
+  hdNote: 'Requirement of two 4TB External Hard Drives for client data safety.'
 };
 
 function initQuotationGenerator() {
@@ -645,6 +644,9 @@ function populateQuotationForm() {
   if (finalInput) finalInput.value = activeQuotation.finalPct || '';
   if (hdNoteInput) hdNoteInput.value = activeQuotation.hdNote || '';
 
+  const tplSelect = document.getElementById('quote-template-select');
+  if (tplSelect) tplSelect.value = activeQuotation.selectedTemplate || 'template1';
+
   const svcPic = document.getElementById('svc-pictures-check');
   const svcFilm = document.getElementById('svc-films-check');
   const svcAlbum = document.getElementById('svc-albums-check');
@@ -654,6 +656,16 @@ function populateQuotationForm() {
   if (svcFilm) svcFilm.checked = activeQuotation.services.films;
   if (svcAlbum) svcAlbum.checked = activeQuotation.services.albums;
   if (svcVid) svcVid.checked = activeQuotation.services.videos;
+
+  const addonLed = document.getElementById('addon-led-check');
+  const addonStream = document.getElementById('addon-livestream-check');
+  const addonDrone = document.getElementById('addon-drone-check');
+  const albumCountEl = document.getElementById('addon-album-count');
+
+  if (addonLed) addonLed.checked = !!activeQuotation.addOns.ledWall;
+  if (addonStream) addonStream.checked = !!activeQuotation.addOns.liveStream;
+  if (addonDrone) addonDrone.checked = !!activeQuotation.addOns.droneCoverage;
+  if (albumCountEl) albumCountEl.textContent = activeQuotation.addOns.extraAlbums || 0;
 }
 
 function renderQuoteEventsForm() {
@@ -838,10 +850,44 @@ function bindQuotationEvents() {
   bindInput('quote-final-pct', 'finalPct');
   bindInput('quote-hd-note', 'hdNote');
 
+  const tplSelect = document.getElementById('quote-template-select');
+  if (tplSelect) {
+    tplSelect.addEventListener('change', (e) => {
+      activeQuotation.selectedTemplate = e.target.value;
+      renderProposalPreview();
+    });
+  }
+
   bindInput('svc-pictures-check', 'services', 'pictures');
   bindInput('svc-films-check', 'services', 'films');
   bindInput('svc-albums-check', 'services', 'albums');
   bindInput('svc-videos-check', 'services', 'videos');
+
+  bindInput('addon-led-check', 'addOns', 'ledWall');
+  bindInput('addon-livestream-check', 'addOns', 'liveStream');
+  bindInput('addon-drone-check', 'addOns', 'droneCoverage');
+
+  const albumMinus = document.getElementById('btn-addon-album-minus');
+  const albumPlus = document.getElementById('btn-addon-album-plus');
+  const albumCount = document.getElementById('addon-album-count');
+
+  if (albumMinus) {
+    albumMinus.addEventListener('click', () => {
+      if (activeQuotation.addOns.extraAlbums > 0) {
+        activeQuotation.addOns.extraAlbums--;
+        if (albumCount) albumCount.textContent = activeQuotation.addOns.extraAlbums;
+        renderProposalPreview();
+      }
+    });
+  }
+
+  if (albumPlus) {
+    albumPlus.addEventListener('click', () => {
+      activeQuotation.addOns.extraAlbums++;
+      if (albumCount) albumCount.textContent = activeQuotation.addOns.extraAlbums;
+      renderProposalPreview();
+    });
+  }
 
   const addEvtBtn = document.getElementById('btn-add-quote-event');
   if (addEvtBtn) {
@@ -913,402 +959,484 @@ function bindQuotationEvents() {
   }
 }
 
+// Confetti Effect Generator
+function triggerConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100vw';
+  canvas.style.height = '100vh';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '99999';
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const colors = ['#F59E0B', '#FBBF24', '#D4AF37', '#FFFFFF', '#EAB308', '#C5A059'];
+
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height * 0.45,
+      vx: (Math.random() - 0.5) * 24,
+      vy: (Math.random() - 0.75) * 22,
+      size: Math.random() * 9 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1,
+      rotation: Math.random() * 360,
+      rSpeed: (Math.random() - 0.5) * 12
+    });
+  }
+
+  let startTime = Date.now();
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.38;
+      p.alpha -= 0.012;
+      p.rotation += p.rSpeed;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      ctx.restore();
+    });
+
+    if (elapsed < 3200) {
+      requestAnimationFrame(animate);
+    } else {
+      canvas.remove();
+    }
+  }
+  animate();
+}
+
+function getCalculatedTotalPrice() {
+  const baseStr = (activeQuotation.totalPrice || '2,50,000').replace(/[^0-9]/g, '');
+  let total = parseInt(baseStr, 10) || 250000;
+
+  if (activeQuotation.addOns.ledWall) total += 25000;
+  if (activeQuotation.addOns.liveStream) total += 15000;
+  if (activeQuotation.addOns.droneCoverage) total += 15000;
+  if (activeQuotation.addOns.extraAlbums > 0) total += 25000 * activeQuotation.addOns.extraAlbums;
+
+  return total.toLocaleString('en-IN');
+}
+
 function renderProposalPreview() {
   const container = document.getElementById('proposal-template-preview');
   if (!container) return;
 
+  const isDarkTemplate = activeQuotation.selectedTemplate === 'template2';
+  container.className = isDarkTemplate ? 'proposal-paper-dark' : 'proposal-paper';
+
   const datesSummary = activeQuotation.events.map(e => e.date).filter(Boolean).join(' • ') || 'Upcoming Wedding Dates';
+  const calculatedTotal = getCalculatedTotalPrice();
 
-  const eventsHtml = activeQuotation.events.map(e => {
-    const crewLines = [];
-    if (e.candidPhoto) crewLines.push(`${e.candidPhoto} Candid Photographer`);
-    if (e.candidVideo) crewLines.push(`${e.candidVideo} Candid Videographer`);
-    if (e.tradPhoto) crewLines.push(`${e.tradPhoto} Traditional Photographer`);
-    if (e.tradVideo) crewLines.push(`${e.tradVideo} Traditional Videographer`);
-    if (e.dronePilot) crewLines.push(`${e.dronePilot} Drone Pilot`);
+  if (isDarkTemplate) {
+    // =========================================================================
+    // TEMPLATE 2: MODERN DARK GLASSMORPHISM LUXURY TEMPLATE
+    // =========================================================================
+    const eventsDarkHtml = activeQuotation.events.map(e => {
+      const crewParts = [];
+      if (e.candidPhoto) crewParts.push(`${e.candidPhoto} Candid Photo`);
+      if (e.candidVideo) crewParts.push(`${e.candidVideo} Candid Video`);
+      if (e.tradPhoto) crewParts.push(`${e.tradPhoto} Trad Photo`);
+      if (e.tradVideo) crewParts.push(`${e.tradVideo} Trad Video`);
+      if (e.dronePilot) crewParts.push(`${e.dronePilot} Drone`);
 
-    return `
-      <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
-        <div style="font-size: 0.82rem; color: #55524E; font-family: var(--font-paragraph); margin-bottom: 0.35rem;">
-          ${e.date || 'TBD Date'} | ${e.location || 'Location'}
+      const badgesHtml = Array.isArray(e.badges) && e.badges.length > 0 ? `
+        <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.75rem;">
+          ${e.badges.map(b => `<span class="proposal-dark-badge" style="font-size: 0.68rem; padding: 0.15rem 0.5rem;">✨ ${b}</span>`).join('')}
         </div>
-        <h4 style="font-family: var(--font-heading); font-size: 1.35rem; color: #1A1816; margin: 0 0 0.85rem 0; font-weight: 600;">
-          ${e.name || 'Event Title'}
-        </h4>
-        <div style="font-size: 0.88rem; color: #2C2622; line-height: 1.6;">
-          ${crewLines.map(c => `<div>${c}</div>`).join('')}
+      ` : '';
+
+      return `
+        <div class="proposal-glass-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+            <h4 style="font-family: var(--font-heading); font-size: 1.25rem; color: #F4F4F5; margin: 0 0 0.2rem 0; font-weight: 600;">${e.name || 'Event Title'}</h4>
+            <span class="proposal-dark-badge">🗓️ ${e.date || 'Date'}</span>
+          </div>
+          <div style="font-size: 0.85rem; color: #F59E0B; font-family: var(--font-ui); font-weight: 600; margin-bottom: 0.75rem;">
+            📍 ${e.location || 'Location'}
+          </div>
+          <div style="font-size: 0.82rem; color: #A1A1AA; border-top: 1px solid rgba(245, 158, 11, 0.15); padding-top: 0.65rem;">
+            <strong style="color: #F4F4F5;">Dedicated Crew:</strong> ${crewParts.join(' • ')}
+          </div>
+          ${badgesHtml}
         </div>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <!-- 1. HERO HEADER -->
+      <div style="margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(245, 158, 11, 0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div class="proposal-dark-badge" style="margin-bottom: 0.6rem;">LUXURY GLASSMORPHISM PROPOSAL</div>
+            <h1 style="font-family: var(--font-heading); font-size: 2.2rem; color: #FFFFFF; margin: 0; font-weight: 400; letter-spacing: 0.02em;">
+              Timemachine & Co.
+            </h1>
+            <p style="font-size: 0.9rem; color: #F59E0B; font-family: var(--font-ui); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 0.25rem;">
+              "Because Every Frame Has a Story to Tell"
+            </p>
+          </div>
+          <div style="text-align: right; font-size: 0.82rem; color: #A1A1AA; font-family: var(--font-ui);">
+            <div style="color: #FBBF24; font-weight: 600;">📞 +91 97056 32982</div>
+            <div>🌐 timemachineworks.com</div>
+          </div>
+        </div>
+
+        <!-- Personalized Welcome Banner -->
+        <div class="proposal-glass-card" style="margin-top: 2rem; text-align: center; border-color: rgba(245, 158, 11, 0.4); background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(24, 24, 27, 0.8) 100%);">
+          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #FBBF24; font-weight: 700;">PROPOSAL PREPARED ESPECIALLY FOR</span>
+          <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #FFFFFF; margin: 0.3rem 0 0.2rem 0;">${activeQuotation.clientName || 'Bhavya Allu'}</h2>
+          <p style="font-size: 0.92rem; color: #D4D4D8; margin: 0.2rem 0 0.8rem 0;">${activeQuotation.coupleNames || ''}</p>
+          <div style="font-size: 0.82rem; color: #F59E0B; font-family: var(--font-ui); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">
+            ✨ Celebrating Your Wedding Story &nbsp;•&nbsp; 🗓️ ${datesSummary}
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. EVENT SCHEDULE (ANIMATED CARDS) -->
+      <div style="margin-bottom: 3rem;">
+        <div style="text-align: center; margin-bottom: 1.75rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">CELEBRATION SCHEDULE</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #FFFFFF; margin-top: 0.2rem; font-weight: 400;">Event Schedule & Crew Breakdown</h3>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+          ${eventsDarkHtml}
+        </div>
+      </div>
+
+      <!-- 3. CORE DELIVERABLES GRID -->
+      <div style="margin-bottom: 3rem;">
+        <div style="text-align: center; margin-bottom: 1.75rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">EDITORIAL OUTPUTS</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #FFFFFF; margin-top: 0.2rem; font-weight: 400;">Core Deliverables Archive</h3>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+          <div class="proposal-glass-card">
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">📸</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">1,000 Edited Images</h4>
+            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">60-day cloud gallery delivery with signature color grading & high-res printing rights.</p>
+          </div>
+
+          <div class="proposal-glass-card">
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🎬</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">Cinematic HD Film</h4>
+            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">4K Teaser & Feature Film (60-day delivery, 1 round of revisions included).</p>
+          </div>
+
+          <div class="proposal-glass-card">
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🎥</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">Traditional Film</h4>
+            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">Full uncut documentary video coverage of ceremony proceedings (75-day delivery).</p>
+          </div>
+
+          <div class="proposal-glass-card">
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">📖</div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #F4F4F5; margin: 0 0 0.3rem 0;">3 Signature Albums</h4>
+            <p style="font-size: 0.82rem; color: #A1A1AA; margin: 0; line-height: 1.5;">Handcrafted fine-art printed albums (40 sheets each; extra sheets @ ₹600/sheet).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. REAL-TIME DYNAMIC PRICE CALCULATOR -->
+      <div style="margin-bottom: 3rem;">
+        <div class="proposal-dark-price-box">
+          <span style="font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: #FBBF24; font-weight: 700;">DYNAMIC INVESTMENT CALCULATOR</span>
+          <p style="font-size: 1rem; color: #E4E4E7; margin: 0.6rem 0 0.2rem 0; font-family: var(--font-paragraph);">
+            Dear <strong style="color: #FFFFFF;">${activeQuotation.clientName || 'Bhavya Allu'}</strong>, your calculated total investment is:
+          </p>
+          
+          <div class="proposal-dark-price-val">₹ ${calculatedTotal}</div>
+          
+          <div style="font-size: 0.82rem; color: #A1A1AA; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <span>Base Package: ₹${activeQuotation.totalPrice || '2,50,000'}</span>
+            ${activeQuotation.addOns.ledWall ? `<span style="color: #FBBF24;">+ LED Wall (₹25k)</span>` : ''}
+            ${activeQuotation.addOns.liveStream ? `<span style="color: #FBBF24;">+ Live Stream (₹15k)</span>` : ''}
+            ${activeQuotation.addOns.droneCoverage ? `<span style="color: #FBBF24;">+ Drone (₹15k)</span>` : ''}
+            ${activeQuotation.addOns.extraAlbums > 0 ? `<span style="color: #FBBF24;">+ ${activeQuotation.addOns.extraAlbums} Extra Album(s)</span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. TERMS & POLICIES -->
+      <div style="margin-bottom: 3rem;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #F59E0B; font-weight: 700;">TRANSPARENT TERMS</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #FFFFFF; margin-top: 0.2rem; font-weight: 400;">Terms & Policies</h3>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div class="proposal-glass-card" style="font-size: 0.85rem;">
+            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">✈️ Travel & Accommodations</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">Travel & stay to be arranged by client for events outside Hyderabad.</p>
+          </div>
+
+          <div class="proposal-glass-card" style="font-size: 0.85rem;">
+            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">💳 Payment Retainer Schedule</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">50% booking retainer, 50% balance prior to raw footage handover.</p>
+          </div>
+
+          <div class="proposal-glass-card" style="font-size: 0.85rem;">
+            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">💾 Data Safety & Storage</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">Requirement of two 4TB external hard drives for client data safety.</p>
+          </div>
+
+          <div class="proposal-glass-card" style="font-size: 0.85rem;">
+            <strong style="color: #FBBF24; display: block; margin-bottom: 0.3rem;">🔒 Non-Refundable Policy</strong>
+            <p style="color: #A1A1AA; margin: 0; line-height: 1.5;">Booking retainers are non-refundable upon cancellation.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. ACCEPT PROPOSAL & RESERVE DATE BUTTON -->
+      <div style="text-align: center;">
+        <button type="button" class="proposal-accept-btn" id="btn-accept-proposal">
+          ✨ Accept Proposal & Reserve Date
+        </button>
+        <p style="font-size: 0.78rem; color: #71717A; margin-top: 0.75rem;">
+          Clicking reserves your dates & notifies lead cinematographer via instant dispatch.
+        </p>
       </div>
     `;
-  }).join('');
 
-  const svcs = activeQuotation.services;
+    // Attach Accept Proposal event listener
+    const acceptBtn = document.getElementById('btn-accept-proposal');
+    if (acceptBtn) {
+      acceptBtn.addEventListener('click', () => {
+        triggerConfetti();
+        const modal = document.getElementById('proposal-confirm-modal');
+        const modalText = document.getElementById('modal-confirm-client-text');
+        if (modalText) {
+          modalText.textContent = `Thank you, ${activeQuotation.clientName || 'Bhavya Allu'}! Your wedding dates (${datesSummary}) have been provisionally reserved in our studio master calendar with a total investment of ₹ ${calculatedTotal}.`;
+        }
+        if (modal) modal.classList.add('active');
+      });
+    }
 
-  container.innerHTML = `
-    <!-- PAGE 1: COVER PAGE (Matching Image 1) -->
-    <div class="proposal-section-page" style="position: relative; background: #FBF9F5; min-height: 720px; padding: 2.5rem; border-radius: 12px; overflow: hidden; margin-bottom: 3.5rem;">
-      <!-- Top Right TM&CO Logo Box -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <!-- Top Left Branch Art SVG -->
-        <svg width="140" height="100" viewBox="0 0 140 100" fill="none" stroke="#C5A059" stroke-width="1.2">
-          <path d="M0 0 C40 20, 80 10, 120 40 M30 15 C50 5, 70 25, 90 20 M60 30 C80 20, 100 35, 130 30"></path>
-          <circle cx="90" cy="20" r="3" fill="#C5A059"></circle>
-          <circle cx="120" cy="40" r="3" fill="#C5A059"></circle>
-        </svg>
+    const closeModalBtn = document.getElementById('btn-close-confirm-modal');
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', () => {
+        const modal = document.getElementById('proposal-confirm-modal');
+        if (modal) modal.classList.remove('active');
+      });
+    }
 
-        <div style="border: 2px solid #C5A059; padding: 0.5rem 1rem; text-align: center;">
-          <div style="font-family: var(--font-heading); font-size: 1.2rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1;">TM</div>
-          <div style="font-family: var(--font-heading); font-size: 0.95rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1; margin-top: 0.2rem;">&CO</div>
+  } else {
+    // =========================================================================
+    // TEMPLATE 1: FINE ART WARM CREAM LUXURY TEMPLATE
+    // =========================================================================
+    const eventsHtml = activeQuotation.events.map(e => {
+      const crewParts = [];
+      if (e.candidPhoto) crewParts.push(`${e.candidPhoto} Candid Photographer${e.candidPhoto > 1 ? 's' : ''}`);
+      if (e.candidVideo) crewParts.push(`${e.candidVideo} Candid Videographer${e.candidVideo > 1 ? 's' : ''}`);
+      if (e.tradPhoto) crewParts.push(`${e.tradPhoto} Traditional Photographer${e.tradPhoto > 1 ? 's' : ''}`);
+      if (e.tradVideo) crewParts.push(`${e.tradVideo} Traditional Videographer${e.tradVideo > 1 ? 's' : ''}`);
+      if (e.dronePilot) crewParts.push(`${e.dronePilot} Drone Pilot${e.dronePilot > 1 ? 's' : ''}`);
+
+      return `
+        <div class="proposal-event-card">
+          <h4 class="proposal-event-title">${e.name || 'Event Title'}</h4>
+          <div class="proposal-event-meta">
+            📍 ${e.location || 'Location'} • 🗓️ ${e.date || 'Date'}
+          </div>
+          <div style="font-size: 0.85rem; color: #1A1816; line-height: 1.6; border-top: 1px solid rgba(197, 160, 89, 0.2); padding-top: 0.6rem;">
+            <strong>Dedicated Crew Breakdown:</strong>
+            <ul style="margin: 0.3rem 0 0 1.2rem; padding: 0;">
+              ${crewParts.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+          </div>
         </div>
-      </div>
+      `;
+    }).join('');
 
-      <!-- Center Client Name Greeting -->
-      <div style="text-align: center; margin: 4rem 0 2rem 0;">
-        <h2 style="font-family: var(--font-heading); font-size: 2.2rem; color: #C5A059; font-weight: 400; font-style: italic;">
-          ${activeQuotation.clientName || 'Name'}
-        </h2>
-      </div>
+    const svcs = activeQuotation.services;
 
-      <!-- Center Butterfly Graphic Art -->
-      <div style="text-align: right; padding-right: 2rem; margin-bottom: 3rem;">
-        <svg width="120" height="160" viewBox="0 0 120 160" fill="none" stroke="#C5A059" stroke-width="1.2">
-          <path d="M60 40 C30 10, 10 30, 40 70 C10 90, 40 120, 60 100 C80 120, 110 90, 80 70 C110 30, 90 10, 60 40 Z"></path>
-          <path d="M60 100 C40 120, 30 140, 60 150 C90 140, 80 120, 60 100 Z"></path>
-        </svg>
-      </div>
+    container.innerHTML = `
+      <!-- PAGE 1: COVER PAGE -->
+      <div class="proposal-section-page">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem;">
+          <div>
+            <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #C5A059; font-weight: 700;">FINE ART PROPOSAL</span>
+            <h1 style="font-family: var(--font-heading); font-size: 1.8rem; color: #1A1816; margin: 0.2rem 0 0 0; font-weight: 400;">Timemachine & Co</h1>
+          </div>
+          <div class="proposal-header-logo-badge">TM & CO</div>
+        </div>
 
-      <!-- Banner Tagline -->
-      <div style="margin-top: 2rem;">
-        <h3 style="font-family: var(--font-heading); font-size: 1.45rem; letter-spacing: 0.14em; text-transform: uppercase; color: #C5A059; font-weight: 400; margin: 0;">
-          BECAUSE EVERY <span style="font-size: 1.8rem; letter-spacing: 0.08em;">FRAME</span>
-        </h3>
-        <h3 style="font-family: var(--font-heading); font-size: 1.45rem; letter-spacing: 0.14em; text-transform: uppercase; color: #C5A059; font-weight: 400; margin: 0.2rem 0 0 0;">
-          HAS A <span style="font-size: 1.8rem; letter-spacing: 0.08em;">STORY</span> TO TELL
-        </h3>
-      </div>
+        <div style="text-align: center; margin: 2rem 0;">
+          <svg width="60" height="40" viewBox="0 0 100 60" fill="none" stroke="#C5A059" stroke-width="1.5">
+            <path d="M50 30 C30 10, 10 20, 20 40 C30 50, 45 40, 50 30 Z"></path>
+            <path d="M50 30 C70 10, 90 20, 80 40 C70 50, 55 40, 50 30 Z"></path>
+            <circle cx="50" cy="30" r="2" fill="#C5A059"></circle>
+          </svg>
+        </div>
 
-      <div style="margin-top: 3.5rem; border-top: 1px solid rgba(197, 160, 89, 0.25); padding-top: 1.5rem;">
-        <h4 style="font-family: var(--font-heading); font-size: 1.25rem; color: #C5A059; font-weight: 600; margin: 0 0 0.4rem 0;">
-          Dear ${activeQuotation.clientName || 'Name'}
-        </h4>
-        <p style="font-size: 0.92rem; color: #2C2622; line-height: 1.65; margin: 0;">
-          We appreciate the opportunity to be a part of your special day and capture the timeless moments that will make your wedding a cherished memory.
-        </p>
-      </div>
-    </div>
-
-    <!-- PAGE 2: ABOUT US (Matching Image 2) -->
-    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
-      <div style="position: relative; border-radius: 12px; overflow: hidden; height: 260px; margin-bottom: 2.5rem; background: #1A1816;">
-        <img src="./images/niharika/main-shrine-couple.jpg" alt="Showcase Banner" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.55; filter: grayscale(100%);">
-        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #FFFFFF; padding: 1.5rem;">
-          <div style="border: 1.5px solid #C5A059; padding: 0.25rem 0.6rem; color: #C5A059; font-family: var(--font-heading); font-size: 0.75rem; letter-spacing: 0.15em; margin-bottom: 0.5rem;">TM & CO</div>
-          <h2 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; letter-spacing: 0.18em; margin: 0; text-transform: uppercase;">
-            TIMEMACHINE & CO
+        <div style="text-align: center; margin: 1.5rem 0 2.5rem 0;">
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #1A1816; font-weight: 400; line-height: 1.4;">
+            BECAUSE EVERY FRAME HAS A STORY TO TELL
           </h2>
-          <span style="font-family: var(--font-ui); font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: #E5C98D; margin-top: 0.3rem;">PRESENTS</span>
+          <p style="font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.18em; color: #C5A059; text-transform: uppercase; margin-top: 0.5rem;">
+            Customized Fine Art Photography & Cinema Proposal
+          </p>
         </div>
-      </div>
 
-      <div class="proposal-divider-star">— ✦ —</div>
+        <div class="proposal-divider-star">— ✦ —</div>
 
-      <div style="text-align: center; max-width: 680px; margin: 1.5rem auto;">
-        <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1rem 0; font-weight: 600;">About Us</h2>
-        <p style="font-size: 0.95rem; color: #2C2622; line-height: 1.75; margin: 0;">
-          At Timemachine & Co, we freeze fleeting moments to make your forever love story a timeless masterpiece, weaving the magic of your wedding into a tapestry of emotions, traditions, and heirlooms. Embark on your journey with us, and create a visual legacy treasured for generations to come.
-        </p>
-      </div>
-
-      <div class="proposal-divider-star">— ✦ —</div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
-        <div style="height: 280px; border-radius: 10px; overflow: hidden; border: 1px solid #EAE3D2;">
-          <img src="./images/niharika/bridal-braid.jpg" alt="Gallery Portrait" style="width:100%; height:100%; object-fit:cover;">
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-          <div style="height: 132px; border-radius: 10px; overflow: hidden; border: 1px solid #EAE3D2;">
-            <img src="./images/niharika/lotus-portrait.jpg" alt="Gallery 2" style="width:100%; height:100%; object-fit:cover;">
-          </div>
-          <div style="height: 132px; border-radius: 10px; overflow: hidden; border: 1px solid #EAE3D2;">
-            <img src="./images/niharika/pooja-lighting.jpg" alt="Gallery 3" style="width:100%; height:100%; object-fit:cover;">
+        <div style="background: #F5F1E8; border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 10px; padding: 1.75rem; text-align: center; margin-top: 2rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #C5A059; font-weight: 600;">PREPARED ESPECIALLY FOR</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #1A1816; margin: 0.4rem 0 0.2rem 0;">${activeQuotation.clientName || 'Valued Client'}</h3>
+          <p style="font-size: 0.9rem; color: #55524E; margin: 0.2rem 0 0.8rem 0;">${activeQuotation.coupleNames || ''}</p>
+          <div style="font-size: 0.82rem; color: #C5A059; font-family: var(--font-ui); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">
+            🗓️ ${datesSummary} &nbsp;•&nbsp; 📞 ${activeQuotation.phone || '-'}
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- PAGE 3: YOUR EVENTS (Matching Image 3) -->
-    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
-      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 600;">Your Events</h2>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
-        ${eventsHtml || '<p style="text-align:center;">No events configured.</p>'}
-      </div>
-    </div>
-
-    <!-- PAGE 4: SERVICES OFFERED (Matching Image 4) -->
-    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
-      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 600;">Services Offered</h2>
-
-      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-        ${svcs.pictures ? `
-          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
-            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Edited Pictures</h4>
-            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0;">
-              You shall receive 1,000 fully edited images from all events, portraying your wedding story, delivered on the cloud within 60 days from payment clearance.
-            </p>
+      <!-- PAGE 2: ABOUT US & SHOWCASE -->
+      <div class="proposal-section-page">
+        <div style="position: relative; border-radius: 10px; overflow: hidden; height: 180px; margin-bottom: 2rem; background: #1A1816;">
+          <img src="./images/niharika/main-shrine-couple.jpg" alt="Showcase Banner" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.65; filter: grayscale(100%);">
+          <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #FFFFFF; padding: 1rem;">
+            <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #E5C98D;">TIMEMACHINE & CO PRESENTS</span>
+            <h2 style="font-family: var(--font-heading); font-size: 1.7rem; font-weight: 400; margin-top: 0.3rem;">Fine Art Wedding Stories</h2>
           </div>
-        ` : ''}
+        </div>
 
-        ${svcs.films ? `
-          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
-            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Cinematic Wedding Films</h4>
-            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0 0 0.8rem 0;">
-              1 cinematic HD film with the best footage from your events, edited according to our style, to be delivered on cloud within 60 days from payment clearance. You can suggest any number of changes but all at once and within a week of delivery.
-            </p>
-            <div style="font-size: 0.85rem; color: #55524E; font-style: italic;">
-              *Changes will be accepted only once from 2nd time Rs 15,000 will be charged extra.
+        <div style="max-width: 680px; margin: 0 auto; text-align: center; font-size: 0.92rem; line-height: 1.75; color: #3A3733;">
+          <p style="margin-bottom: 1rem;">
+            "When we started Timemachine & Co, it was more than just clicking pictures—it was about capturing love, joy, and everything in between. Our shared passion for cinema, art, and visual storytelling brought us together."
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 2rem;">
+          <div style="height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid #EAE3D2;">
+            <img src="./images/niharika/lotus-portrait.jpg" alt="Gallery 1" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid #EAE3D2;">
+            <img src="./images/niharika/pooja-lighting.jpg" alt="Gallery 2" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid #EAE3D2;">
+            <img src="./images/niharika/main-shrine-couple.jpg" alt="Gallery 3" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 3: YOUR EVENTS BREAKDOWN -->
+      <div class="proposal-section-page">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #C5A059; font-weight: 700;">EVENT SCHEDULE & STAFFING</span>
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #1A1816; margin-top: 0.2rem; font-weight: 400;">Your Celebration Events</h2>
+        </div>
+
+        <div class="proposal-card-grid">
+          ${eventsHtml || '<p style="text-align:center;">No events configured.</p>'}
+        </div>
+      </div>
+
+      <!-- PAGE 4: SERVICES OFFERED & PRICING -->
+      <div class="proposal-section-page">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #C5A059; font-weight: 700;">DELIVERABLES ARCHIVE</span>
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #1A1816; margin-top: 0.2rem; font-weight: 400;">Services Offered & Deliverables</h2>
+        </div>
+
+        <div class="proposal-card-grid">
+          ${svcs.pictures ? `
+            <div class="proposal-event-card">
+              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">📸</div>
+              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Edited Pictures</h4>
+              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">Color-graded high-res stills delivered via private online gallery.</p>
             </div>
-          </div>
-        ` : ''}
+          ` : ''}
 
-        ${svcs.albums ? `
-          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
-            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Printed Albums</h4>
-            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0;">
-              You shall receive 3 Printed albums from the best events each album has 40 sheets. An extra sheet will incur an additional charge of ₹600 per sheet.
-            </p>
-          </div>
-        ` : ''}
+          ${svcs.films ? `
+            <div class="proposal-event-card">
+              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">🎬</div>
+              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Cinematic Wedding Film</h4>
+              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">4K Teaser trailer + Full Feature Film with original audio remastering & color grading.</p>
+            </div>
+          ` : ''}
 
-        ${svcs.videos ? `
-          <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
-            <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0;">Traditional Videos</h4>
-            <p style="font-size: 0.9rem; color: #2C2622; line-height: 1.65; margin: 0;">
-              You shall receive 5 long traditional video of all events in documentary style, delivered within 75 days from payment clearance.
-            </p>
-          </div>
-        ` : ''}
-      </div>
+          ${svcs.albums ? `
+            <div class="proposal-event-card">
+              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">📖</div>
+              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Printed Albums</h4>
+              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">Handcrafted Italian Leather & Velvet Fine-Art printed hardcover wedding albums.</p>
+            </div>
+          ` : ''}
 
-      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
-
-      <!-- Quote Price Callout Box -->
-      <div style="text-align: center; padding: 2rem 1rem;">
-        <h3 style="font-family: var(--font-heading); font-size: 1.65rem; color: #C5A059; margin: 0 0 0.5rem 0; font-weight: 600;">
-          Dear ${activeQuotation.clientName || 'Name'}
-        </h3>
-        <p style="font-size: 0.95rem; color: #2C2622; margin: 0 0 1rem 0;">
-          Your final quote price would be
-        </p>
-        <div style="font-family: var(--font-heading); font-size: 2.8rem; color: #C5A059; font-weight: 700;">
-          ₹${activeQuotation.totalPrice || '0'}
-        </div>
-      </div>
-
-      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
-    </div>
-
-    <!-- PAGE 5: PAYMENT TIMELINE (Matching Image 5) -->
-    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
-      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 600;">Payment Timeline</h2>
-
-      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.5rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Advance Payment</h4>
-          <p style="font-size: 0.92rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            50% of the total billing value to be paid as an advance to block the dates.
-          </p>
+          ${svcs.videos ? `
+            <div class="proposal-event-card">
+              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">🎥</div>
+              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Traditional Videos</h4>
+              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">Full-length uncut video coverage of ritual proceedings.</p>
+            </div>
+          ` : ''}
         </div>
 
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Final Payment</h4>
-          <p style="font-size: 0.92rem; color: #2C2622; margin: 0 0 0.8rem 0; line-height: 1.6;">
-            Remaining 50% payment along with Transportation charges shall be done before/after wedding before receiving Raw footage.
+        <div class="proposal-divider-star">— ✦ —</div>
+
+        <div class="proposal-price-box">
+          <span style="font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase; color: #C5A059; font-weight: 700;">TOTAL COMMISSION INVESTMENT</span>
+          <p style="font-size: 1rem; color: #1A1816; margin: 0.6rem 0 0.2rem 0; font-family: var(--font-paragraph);">
+            Dear <strong>${activeQuotation.clientName || 'Client'}</strong>, Your final quote price would be:
           </p>
-          <div style="font-size: 0.85rem; color: #55524E; font-style: italic;">
-            *You're required to provide us 2 units of 4TB Hard Drives to ensure the backup and safety of your data.
-          </div>
+          <div class="proposal-price-val">₹ ${calculatedTotal}</div>
+          <p style="font-size: 0.8rem; color: #757069; margin: 0;">(Inclusive of all crew travel, editing, color grading & production costs)</p>
         </div>
       </div>
 
-      <div style="font-size: 0.92rem; color: #1A1816; font-weight: 600; margin-top: 1.5rem;">
-        Note : Incase of any cancellation, the advance or the payments cannot be returned.
-      </div>
-    </div>
+      <!-- PAGE 5: PAYMENT TIMELINE & POLICY -->
+      <div class="proposal-section-page">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #C5A059; font-weight: 700;">COMMISSION TERMS</span>
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #1A1816; margin-top: 0.2rem; font-weight: 400;">Payment Timeline & Policy</h2>
+        </div>
 
-    <!-- PAGE 6: ADDITIONAL SERVICES (Matching Image 6) -->
-    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
-      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 0.6rem 0; font-weight: 600;">Additional Services</h2>
-      <p style="font-size: 0.92rem; color: #2C2622; margin: 0 0 1.75rem 0; line-height: 1.6;">
-        If you're interested in expanding your package, we also provide additional services that are not included in the standard package:
-      </p>
+        <div class="proposal-card-grid">
+          <div class="proposal-event-card">
+            <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Advance Payment (50%)</h4>
+            <p style="font-size: 0.85rem; color: #55524E; margin: 0; line-height: 1.5;">${activeQuotation.advancePct || '50% Advance Upon Booking Confirmation'}</p>
+          </div>
 
-      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.5rem; position: relative;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">LED Wall</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
-            Digital LED Screens to showcase your Event video from multiple cameras LIVE. Equipped with a P3 display, of about 10 ft width and 8ft height.
-          </p>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹25000</div>
-            <button type="button" style="background: #F8F4EC; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
+          <div class="proposal-event-card">
+            <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Final Payment (50%)</h4>
+            <p style="font-size: 0.85rem; color: #55524E; margin: 0; line-height: 1.5;">${activeQuotation.finalPct || '50% Balance Prior to First Event Date'}</p>
           </div>
         </div>
 
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem; position: relative;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">Web Live</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
-            Live telecasting of your event video footage on the web. You're required to provide a name to generate a custom link that you can share with your friends and family so that they can watch the event remotely.
-          </p>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹15000</div>
-            <button type="button" style="background: #E6D7B8; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
-          </div>
-        </div>
-
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.5rem; position: relative;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">Drone</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
-            If you wish for a drone service for your events it would be chargeable at Rs.15,000/- per event. The drones will be used to cover decor only and are subject to government permissions.
-          </p>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹15000</div>
-            <button type="button" style="background: #F8F4EC; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
-          </div>
-        </div>
-
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem; position: relative;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.5rem 0;">Print Albums</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0 0 1rem 0; line-height: 1.6;">
-            Premium designer album of 40 sheets portraying your wedding story and each costs
-          </p>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: #1A1816;">₹25000</div>
-            <button type="button" style="background: #E6D7B8; border: none; padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #1A1816;">Select</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
-    </div>
-
-    <!-- PAGE 7: TERMS OF SERVICE (Matching Images 7 & 8) -->
-    <div class="proposal-section-page" style="margin-bottom: 3.5rem;">
-      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 0.6rem 0; font-weight: 600;">Terms of Service</h2>
-      <p style="font-size: 0.92rem; color: #2C2622; margin: 0 0 1.75rem 0; line-height: 1.6;">
-        Our terms of service, including cancellation policies and copyright information, are detailed below for your review.
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 1.1rem;">
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Travel Expense</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            You shall arrange for the travel and accommodation of our shoot crew for all your events occurring in places away from hyderabad.
+        <div style="background: #F5F1E8; border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 8px; padding: 1.25rem; margin-top: 1.25rem;">
+          <strong style="font-size: 0.88rem; color: #1A1816; display: flex; align-items: center; gap: 0.4rem;">
+            💾 Raw Footage Hard Drive Requirement:
+          </strong>
+          <p style="font-size: 0.82rem; color: #55524E; margin: 0.3rem 0 0 0; line-height: 1.5;">
+            ${activeQuotation.hdNote || 'Client to provide two 4TB high-speed USB-C External Hard Drives for raw footage & master video delivery.'}
           </p>
         </div>
 
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Project Cancellation</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            If you cancel the project after the advance payment & reserving team schedules for you, the payments cannot be returned.
-          </p>
+        <div style="font-size: 0.78rem; color: #8C8780; text-align: center; margin-top: 2.5rem; border-top: 1px solid rgba(197, 160, 89, 0.2); padding-top: 1.25rem;">
+          Timemachine & Co • Fine Art Wedding Cinematography & Photography • All Rights Reserved.
         </div>
-
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Delivery Timeline</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            We strictly adhere to deliveries on the mentioned timeline. We do not entertain any early requests, as it will hamper timelines of other deliverables.
-          </p>
-        </div>
-
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Change of Plans</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            Any change of plans or postponement of events will be accommodated with the best team available on the new dates and chargeable depending on the type of events and crew required.
-          </p>
-        </div>
-
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Shoot Permissions</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            Please note that all the required government permissions for any couple shoot shall be attained by the clients and the team is in no way responsible for it. In case of any fines/ inconvenience to the shoot, we are not to be held responsible.
-          </p>
-        </div>
-
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Print Albums</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            Photos selection has to be given by the client and that is mandatory. After the selection has been given it will take 25-30 days for the team to send you the layouts and once the approval has been made from the client, then it will take a week to hand over the albums. If selections are not made for more than 7 months from the date of the event then each album will be charged Rs. 15,000/- extra
-          </p>
-        </div>
-
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Security for Loss</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            Client agrees to indemnify and hold harmless to the crew for any liability, damage or loss, related to technological failure, including data loss.
-          </p>
-        </div>
-
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Data Safety</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            Although we've never lost any event's data in the past 12 years, in the rarest probability of any data loss, we are liable to shoot another event for free or deduct the corresponding event charges.
-          </p>
-        </div>
-
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Additional Services Quality</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            We don't take responsibility for the quality of Web-live, LED walls and other services, since they are provided by 3rd party vendors. Our primary focus lies on great work with our photos & videos.
-          </p>
-        </div>
-
-        <div style="background: #E6D7B8; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Video Revisions Timeline:</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            Any requests for video changes must be communicated within 20-30days from the date of final output delivery.
-          </p>
-        </div>
-
-        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.35rem;">
-          <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0;">Final Payment & Editing:</h4>
-          <p style="font-size: 0.9rem; color: #2C2622; margin: 0; line-height: 1.6;">
-            Post-event editing work will begin only after the final payment has been successfully completed. This ensures a streamlined workflow and helps us maintain our quality standards.
-          </p>
-        </div>
-      </div>
-
-      <div class="proposal-divider-star" style="margin: 2.5rem 0;">— ✦ —</div>
-    </div>
-
-    <!-- PAGE 8: NEXT STEPS & BRAND FOOTER (Matching Image 9) -->
-    <div class="proposal-section-page">
-      <h2 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; margin: 0 0 1rem 0; font-weight: 600;">Next Steps</h2>
-      <p style="font-size: 0.95rem; color: #2C2622; line-height: 1.75; margin: 0 0 1.25rem 0;">
-        Please take a moment to review the proposal and attached terms of service. If you have any questions or would like to discuss specific details, feel free to reach out
-      </p>
-      <p style="font-size: 0.95rem; color: #2C2622; line-height: 1.75; margin: 0 0 1.5rem 0;">
-        We eagerly anticipate the opportunity to contribute to your special day and create a visual story that will be cherished for a lifetime.
-      </p>
-      <div style="font-size: 0.95rem; color: #1A1816; font-weight: 600; margin-bottom: 2.5rem;">
-        Best regards,<br>
-        <strong style="font-size: 1.1rem; font-family: var(--font-heading);">Timemachine & Co.</strong>
-      </div>
-
-      <!-- Centered Brand Logo Footer -->
-      <div style="text-align: center; border-top: 1px solid rgba(197, 160, 89, 0.25); padding-top: 3rem; margin-top: 3rem;">
-        <div style="display: inline-block; border: 2px solid #C5A059; padding: 0.6rem 1.2rem; text-align: center; margin-bottom: 1rem;">
-          <div style="font-family: var(--font-heading); font-size: 1.5rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1;">TM</div>
-          <div style="font-family: var(--font-heading); font-size: 1.1rem; color: #C5A059; font-weight: 700; letter-spacing: 0.1em; line-height: 1; margin-top: 0.2rem;">&CO</div>
-        </div>
-
-        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.3rem 0; font-weight: 600;">TimemachineandCo</h3>
-        <div style="font-size: 0.88rem; color: #55524E; margin-bottom: 0.2rem;">https://www.timemachineworks.com</div>
-        <div style="font-size: 0.88rem; color: #C5A059; font-weight: 600;">+919705632982</div>
-      </div>
-    </div>
-  `;
+    `;
+  }
 }
+
 
 // ==========================================================================
 // 4. LOAD SITE CONTENT (FROM MONGODB OR DEFAULTS)

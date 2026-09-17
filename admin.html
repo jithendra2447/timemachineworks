@@ -1026,6 +1026,97 @@
       margin: 0.5rem 0;
     }
 
+    /* TEMPLATE 2: DARK GLASSMORPHISM LUXURY PROPOSAL PREVIEW STYLES */
+    .proposal-paper-dark {
+      background: #09090B;
+      color: #F4F4F5;
+      font-family: var(--font-paragraph);
+      padding: 3rem;
+      border-radius: 16px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .proposal-glass-card {
+      background: rgba(24, 24, 27, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .proposal-glass-card:hover {
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 8px 32px rgba(245, 158, 11, 0.15);
+    }
+
+    .proposal-dark-badge {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%);
+      border: 1px solid #F59E0B;
+      color: #FBBF24;
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .proposal-dark-price-box {
+      background: linear-gradient(135deg, rgba(24, 24, 27, 0.95) 0%, rgba(39, 39, 42, 0.95) 100%);
+      border: 2px solid #F59E0B;
+      border-radius: 16px;
+      padding: 2.25rem;
+      text-align: center;
+      margin-top: 2rem;
+      box-shadow: 0 10px 40px rgba(245, 158, 11, 0.25);
+    }
+
+    .proposal-dark-price-val {
+      font-family: var(--font-heading);
+      font-size: 2.75rem;
+      color: #FBBF24;
+      font-weight: 800;
+      margin: 0.5rem 0;
+      text-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+    }
+
+    .proposal-accept-btn {
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+      color: #000000;
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: none;
+      padding: 1.1rem 2.25rem;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .proposal-accept-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(245, 158, 11, 0.6);
+      background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+    }
+
     @media print {
       body * {
         visibility: hidden;
@@ -1541,7 +1632,13 @@
         <div class="quotation-toolbar">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <span style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--color-heading);">Luxury Proposal Tools</span>
-            <span style="font-size: 0.78rem; background: #FAF5E8; border: 1px solid #E5C98D; color: #C5A059; padding: 0.2rem 0.6rem; border-radius: 999px; font-family: var(--font-ui); font-weight: 600;">FINE ART TEMPLATE</span>
+            <div style="display: flex; align-items: center; gap: 0.4rem; background: #FAF5E8; border: 1px solid #E5C98D; padding: 0.25rem 0.75rem; border-radius: 999px;">
+              <span style="font-size: 0.72rem; color: #C5A059; font-family: var(--font-ui); font-weight: 700;">TEMPLATE:</span>
+              <select id="quote-template-select" style="background: transparent; border: none; font-size: 0.8rem; font-family: var(--font-ui); font-weight: 700; color: #C5A059; cursor: pointer; outline: none;">
+                <option value="template1">1. Fine Art Warm Cream</option>
+                <option value="template2">2. Modern Dark Glassmorphism</option>
+              </select>
+            </div>
           </div>
 
           <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
@@ -1709,6 +1806,57 @@
               </div>
             </div>
 
+            <!-- 5. Add-Ons & Dynamic Calculator Card -->
+            <div class="admin-card">
+              <div class="admin-card-header">
+                <div>
+                  <h3 class="admin-card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    5. Add-Ons & Real-Time Dynamic Calculator
+                  </h3>
+                  <p class="admin-card-desc">Select optional equipment, live streaming, and heirloom album add-ons.</p>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <label style="display: flex; align-items: flex-start; gap: 0.75rem; background: #FAF8F5; border: 1px solid var(--color-border-light); padding: 1rem; border-radius: 8px; cursor: pointer;">
+                  <input type="checkbox" id="addon-led-check" style="margin-top: 0.25rem; width: 18px; height: 18px; accent-color: #F59E0B;">
+                  <div style="flex: 1;">
+                    <strong style="color: var(--color-heading); font-size: 0.95rem;">P3 LED Wall (10x8 ft)</strong> — <span style="color: #F59E0B; font-weight: 700;">+₹25,000 / event</span>
+                    <p style="font-size: 0.82rem; color: var(--color-body-muted); margin: 0.2rem 0 0 0;">High-brightness P3 outdoor/indoor stage backdrop LED screen.</p>
+                  </div>
+                </label>
+
+                <label style="display: flex; align-items: flex-start; gap: 0.75rem; background: #FAF8F5; border: 1px solid var(--color-border-light); padding: 1rem; border-radius: 8px; cursor: pointer;">
+                  <input type="checkbox" id="addon-livestream-check" style="margin-top: 0.25rem; width: 18px; height: 18px; accent-color: #F59E0B;">
+                  <div style="flex: 1;">
+                    <strong style="color: var(--color-heading); font-size: 0.95rem;">Web Live Streaming</strong> — <span style="color: #F59E0B; font-weight: 700;">+₹15,000 / event</span>
+                    <p style="font-size: 0.82rem; color: var(--color-body-muted); margin: 0.2rem 0 0 0;">Multi-camera full HD live stream to YouTube/custom private website link.</p>
+                  </div>
+                </label>
+
+                <label style="display: flex; align-items: flex-start; gap: 0.75rem; background: #FAF8F5; border: 1px solid var(--color-border-light); padding: 1rem; border-radius: 8px; cursor: pointer;">
+                  <input type="checkbox" id="addon-drone-check" style="margin-top: 0.25rem; width: 18px; height: 18px; accent-color: #F59E0B;">
+                  <div style="flex: 1;">
+                    <strong style="color: var(--color-heading); font-size: 0.95rem;">Drone Aerial Coverage</strong> — <span style="color: #F59E0B; font-weight: 700;">+₹15,000 / event</span>
+                    <p style="font-size: 0.82rem; color: var(--color-body-muted); margin: 0.2rem 0 0 0;">4K Aerial cinematic drone views of venue & grand entries.</p>
+                  </div>
+                </label>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #FAF8F5; border: 1px solid var(--color-border-light); padding: 1rem; border-radius: 8px;">
+                  <div>
+                    <strong style="color: var(--color-heading); font-size: 0.95rem;">Extra 40-Sheet Heirloom Albums</strong>
+                    <p style="font-size: 0.82rem; color: var(--color-body-muted); margin: 0.2rem 0 0 0;">+₹25,000 per extra album (extra sheets @ ₹600/sheet)</p>
+                  </div>
+                  <div class="crew-counter-group">
+                    <button type="button" class="crew-btn" id="btn-addon-album-minus">-</button>
+                    <span id="addon-album-count" style="font-weight: 700; font-size: 0.95rem; width: 28px; text-align: center;">0</span>
+                    <button type="button" class="crew-btn" id="btn-addon-album-plus">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- RIGHT LIVE PROPOSAL PREVIEW COLUMN -->
@@ -1770,6 +1918,32 @@
   <div class="admin-toast" id="admin-toast">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
     <span id="admin-toast-text">Website content saved successfully!</span>
+  </div>
+
+  <!-- PROPOSAL APPROVAL CONFIRMATION MODAL -->
+  <div class="admin-media-modal-overlay" id="proposal-confirm-modal">
+    <div class="admin-media-modal-box" style="max-width: 540px; text-align: center; padding: 2.5rem; border-radius: 16px; background: #09090B; border: 2px solid #F59E0B; color: #FFFFFF;">
+      <div style="width: 70px; height: 70px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); border: 2px solid #F59E0B; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; color: #FBBF24; font-size: 2rem;">
+        🎉
+      </div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.8rem; margin: 0 0 0.5rem 0; color: #FBBF24;">Proposal Accepted & Date Reserved!</h3>
+      <p style="font-size: 0.95rem; color: #A1A1AA; line-height: 1.6; margin-bottom: 1.5rem;" id="modal-confirm-client-text">
+        Thank you! Your wedding celebration dates have been provisionally reserved in our studio master calendar.
+      </p>
+
+      <div style="background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 1.25rem; text-align: left; margin-bottom: 2rem; font-size: 0.88rem;">
+        <strong style="color: #FBBF24; display: block; margin-bottom: 0.5rem; text-transform: uppercase; font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.1em;">Next Steps & Confirmation:</strong>
+        <ol style="margin: 0; padding-left: 1.2rem; color: #E4E4E7; line-height: 1.7;">
+          <li>50% Booking Retainer invoice link sent via WhatsApp.</li>
+          <li>Lead Cinematographer & Director assigned to your dates.</li>
+          <li>Pre-wedding consultation & venue walkthrough scheduled.</li>
+        </ol>
+      </div>
+
+      <button type="button" class="proposal-accept-btn" id="btn-close-confirm-modal">
+        Done / Return to Proposal
+      </button>
+    </div>
   </div>
 
   <!-- Admin Script Logic -->
