@@ -22,7 +22,7 @@ app.use(express.json());
 // In-Memory Fallback Store (for offline testing when MongoDB is disconnected)
 const fallbackQuotesStore = [];
 
-// Mongoose Schema & Model
+// Quote Schema & Model
 const QuoteSchema = new mongoose.Schema({
   clientName: { type: String, required: true },
   groomName: { type: String, required: true },
@@ -42,6 +42,33 @@ const QuoteSchema = new mongoose.Schema({
 });
 
 const Quote = mongoose.model('Quote', QuoteSchema);
+
+// Site Content Schema & Model (For Client Admin Portal Edits)
+const SiteContentSchema = new mongoose.Schema({
+  key: { type: String, default: 'active', unique: true },
+  hero: {
+    headline: { type: String, default: 'Timemachine & Co' },
+    subtitle: { type: String, default: 'timeless cinematic wedding stories' },
+    videos: [
+      {
+        title: { type: String },
+        videoUrl: { type: String },
+        poster: { type: String }
+      }
+    ]
+  },
+  about: {
+    tag: { type: String, default: 'OUR JOURNEY & STORY' },
+    title: { type: String, default: 'Capturing Love, Joy & Everything In Between' },
+    paragraphs: [{ type: String }],
+    collageImages: [{ type: String }]
+  },
+  weddingFilms: [{ type: mongoose.Schema.Types.Mixed }],
+  portfolio: [{ type: mongoose.Schema.Types.Mixed }],
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const SiteContent = mongoose.model('SiteContent', SiteContentSchema);
 
 // Database Connection Helper for Serverless & Local
 let isMongoConnected = false;
@@ -200,6 +227,61 @@ app.get(['/api/quotes', '/quotes'], async (req, res) => {
       return res.json({ success: true, count: fallbackQuotesStore.length, data: fallbackQuotesStore });
     }
   } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/admin/login - Authenticate Admin Portal Passcode
+app.post(['/api/admin/login', '/admin/login'], async (req, res) => {
+  const { password } = req.body;
+  const adminSecret = process.env.ADMIN_PASSWORD || 'admin2026';
+  
+  if (password === adminSecret) {
+    return res.json({
+      success: true,
+      token: 'admin-token-' + Date.now(),
+      message: 'Admin authorization successful.'
+    });
+  } else {
+    return res.status(401).json({
+      success: false,
+      error: 'Invalid admin passcode. Access denied.'
+    });
+  }
+});
+
+// GET /api/content - Fetch Live Dynamic Site Content
+app.get(['/api/content', '/content'], async (req, res) => {
+  try {
+    await connectDB();
+    const contentDoc = await SiteContent.findOne({ key: 'active' });
+    if (contentDoc) {
+      return res.json({ success: true, data: contentDoc });
+    }
+    return res.json({ success: true, data: null });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT /api/content - Save Updated Site Content from Admin Portal
+app.put(['/api/content', '/content'], async (req, res) => {
+  try {
+    await connectDB();
+    const payload = req.body;
+    payload.key = 'active';
+    payload.updatedAt = new Date();
+
+    const updated = await SiteContent.findOneAndUpdate(
+      { key: 'active' },
+      payload,
+      { upsert: true, new: true, runValidators: false }
+    );
+
+    console.log('✅ Site content updated in MongoDB Atlas by Admin');
+    return res.json({ success: true, data: updated, message: 'Website content saved successfully!' });
+  } catch (err) {
+    console.error('❌ Error saving site content:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

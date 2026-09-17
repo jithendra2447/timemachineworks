@@ -6,6 +6,46 @@ import { PORTFOLIO_ITEMS, HERO_VIDEOS, EXHIBITIONS, MONOGRAPHS, STUDIO_INFO } fr
 let currentFilter = 'all';
 let soundEnabled = true;
 let activeHeroVideoIndex = 0;
+let dynamicPortfolioItems = [...PORTFOLIO_ITEMS];
+
+async function fetchDynamicSiteContent() {
+  try {
+    const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:5000/api/content'
+      : '/api/content';
+
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+
+    if (res.ok && data.success && data.data) {
+      const c = data.data;
+
+      // Update Hero Headline & Subtitle
+      if (c.hero?.headline) {
+        const headlineEl = document.querySelector('.hero-headline');
+        if (headlineEl) headlineEl.textContent = c.hero.headline;
+      }
+      if (c.hero?.subtitle) {
+        const subEl = document.querySelector('.subtitle-hero-text');
+        if (subEl) subEl.textContent = c.hero.subtitle;
+      }
+
+      // Update About Text
+      if (c.about?.title) {
+        const aboutTitleEl = document.querySelector('.feature-editorial-section .heading-section');
+        if (aboutTitleEl) aboutTitleEl.textContent = c.about.title;
+      }
+
+      // Update Portfolio Data
+      if (Array.isArray(c.portfolio) && c.portfolio.length) {
+        dynamicPortfolioItems = c.portfolio;
+        renderPortfolioGrid();
+      }
+    }
+  } catch (err) {
+    console.log('Using static portfolio defaults:', err);
+  }
+}
 
 // Web Audio API Camera Shutter Click Synthesizer
 function playShutterSound() {
@@ -166,8 +206,8 @@ function renderPortfolioGrid() {
   if (!grid) return;
 
   const filtered = currentFilter === 'all' 
-    ? PORTFOLIO_ITEMS 
-    : PORTFOLIO_ITEMS.filter(item => item.category === currentFilter);
+    ? dynamicPortfolioItems 
+    : dynamicPortfolioItems.filter(item => item.category === currentFilter);
 
   // Column span pattern generator for Swiss asymmetric masonry grid
   const colSpans = ['col-6', 'col-6', 'col-4', 'col-4', 'col-4', 'col-6', 'col-6', 'col-12'];
@@ -175,10 +215,11 @@ function renderPortfolioGrid() {
   grid.innerHTML = filtered.map((item, idx) => {
     const colClass = colSpans[idx % colSpans.length];
     const isVideo = !!item.videoUrl;
+    const cameraBrand = item.exif?.camera ? item.exif.camera.split(' ')[0] : 'CINEMA';
 
     return `
       <div class="portfolio-card ${colClass}" data-id="${item.id}">
-        <div class="portfolio-img-container ratio-${item.aspectRatio.replace('/', '-')}">
+        <div class="portfolio-img-container ratio-${(item.aspectRatio || '4/5').replace('/', '-')}">
           ${isVideo ? `
             <video class="portfolio-img" autoplay loop muted playsinline poster="${item.image}">
               <source src="${item.videoUrl}" type="video/mp4">
@@ -188,7 +229,7 @@ function renderPortfolioGrid() {
           `}
           <div style="position: absolute; top: 1rem; right: 1rem;">
             <span class="exif-badge-pill">
-              ${isVideo ? 'MOTION' : item.exif.camera.split(' ')[0]}
+              ${isVideo ? 'MOTION' : cameraBrand}
             </span>
           </div>
         </div>
@@ -196,10 +237,10 @@ function renderPortfolioGrid() {
         <div class="portfolio-card-info">
           <div>
             <h3 class="portfolio-card-title">${item.title}</h3>
-            <p class="portfolio-card-sub">${item.subtitle} — ${item.location}</p>
+            <p class="portfolio-card-sub">${item.subtitle || ''} — ${item.location || ''}</p>
           </div>
           <div class="exif-badge-pill">
-            ${item.exif.focal} • ${item.exif.aperture}
+            ${item.exif?.focal || '50mm'} • ${item.exif?.aperture || 'f/1.2'}
           </div>
         </div>
       </div>
@@ -210,7 +251,7 @@ function renderPortfolioGrid() {
   grid.querySelectorAll('.portfolio-card').forEach(card => {
     card.addEventListener('click', () => {
       const id = card.getAttribute('data-id');
-      const item = PORTFOLIO_ITEMS.find(p => p.id === id);
+      const item = dynamicPortfolioItems.find(p => p.id === id);
       if (item) openLightbox(item);
     });
   });
@@ -1469,6 +1510,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFormAndSoundHandlers();
   initScrollEffects();
   initQuoteModal();
+  fetchDynamicSiteContent();
 });
 
 
