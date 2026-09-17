@@ -1055,38 +1055,6 @@ function initFilmsCarousel() {
     if (playTrigger) playTrigger.addEventListener('click', handler);
     if (poster) poster.addEventListener('click', handler);
   });
-
-  // Destination Location Pills Filter Handler
-  const filterPills = document.querySelectorAll('.films-dest-pill');
-  filterPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      filterPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-
-      const targetDest = pill.getAttribute('data-dest');
-
-      cardItems.forEach(card => {
-        const cardLocation = (card.querySelector('.films-meta-location')?.textContent || '').toLowerCase();
-        const cardSub = (card.getAttribute('data-sub') || '').toLowerCase();
-        const cardDestAttr = (card.getAttribute('data-dest') || '').toLowerCase();
-
-        if (
-          targetDest === 'all' ||
-          cardDestAttr.includes(targetDest) ||
-          cardLocation.includes(targetDest) ||
-          cardSub.includes(targetDest)
-        ) {
-          card.style.display = 'block';
-          card.style.opacity = '1';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      // Reset scroll back to start when filtering
-      trackWrapper.scrollTo({ left: 0, behavior: 'smooth' });
-    });
-  });
 }
 
 function initScrollEffects() {

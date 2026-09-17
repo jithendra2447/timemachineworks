@@ -1882,45 +1882,6 @@ p, .paragraph-text {
   line-height: 1.6;
 }
 
-/* Destination Filter Pills Bar */
-.films-dest-filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  margin-top: 1.5rem;
-}
-
-.films-dest-pill {
-  background: rgba(26, 24, 22, 0.04);
-  border: 1px solid rgba(26, 24, 22, 0.16);
-  border-radius: 999px;
-  padding: 0.48rem 1.2rem;
-  font-family: var(--font-ui);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  color: #1A1816;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  text-transform: uppercase;
-  outline: none;
-}
-
-.films-dest-pill:hover {
-  background: rgba(26, 24, 22, 0.08);
-  border-color: #1A1816;
-  transform: translateY(-1px);
-}
-
-.films-dest-pill.active {
-  background: #1A1816;
-  color: #FBF9F5;
-  border-color: #1A1816;
-  box-shadow: 0 4px 14px rgba(26, 24, 22, 0.18);
-}
-
 .films-track-wrapper {
   overflow-x: auto;
   scroll-behavior: smooth;
