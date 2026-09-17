@@ -1248,30 +1248,32 @@ function renderProposalPreview() {
         if (modal) modal.classList.remove('active');
       });
     }
-
   } else {
     // =========================================================================
-    // TEMPLATE 1: FINE ART WARM CREAM LUXURY TEMPLATE
+    // TEMPLATE 1: FINE ART WARM CREAM LUXURY TEMPLATE (Matching Reference Images)
     // =========================================================================
     const eventsHtml = activeQuotation.events.map(e => {
-      const crewParts = [];
-      if (e.candidPhoto) crewParts.push(`${e.candidPhoto} Candid Photographer${e.candidPhoto > 1 ? 's' : ''}`);
-      if (e.candidVideo) crewParts.push(`${e.candidVideo} Candid Videographer${e.candidVideo > 1 ? 's' : ''}`);
-      if (e.tradPhoto) crewParts.push(`${e.tradPhoto} Traditional Photographer${e.tradPhoto > 1 ? 's' : ''}`);
-      if (e.tradVideo) crewParts.push(`${e.tradVideo} Traditional Videographer${e.tradVideo > 1 ? 's' : ''}`);
-      if (e.dronePilot) crewParts.push(`${e.dronePilot} Drone Pilot${e.dronePilot > 1 ? 's' : ''}`);
+      const crewLines = [];
+      if (e.candidPhoto) crewLines.push(`${e.candidPhoto} Candid Photographer${e.candidPhoto > 1 ? 's' : ''}`);
+      if (e.candidVideo) crewLines.push(`${e.candidVideo} Candid Videographer${e.candidVideo > 1 ? 's' : ''}`);
+      if (e.tradPhoto) crewLines.push(`${e.tradPhoto} Traditional Photographer${e.tradPhoto > 1 ? 's' : ''}`);
+      if (e.tradVideo) crewLines.push(`${e.tradVideo} Traditional Videographer${e.tradVideo > 1 ? 's' : ''}`);
+      if (e.dronePilot) crewLines.push(`${e.dronePilot} Drone Pilot${e.dronePilot > 1 ? 's' : ''}`);
 
       return `
-        <div class="proposal-event-card">
-          <h4 class="proposal-event-title">${e.name || 'Event Title'}</h4>
-          <div class="proposal-event-meta">
-            📍 ${e.location || 'Location'} • 🗓️ ${e.date || 'Date'}
-          </div>
-          <div style="font-size: 0.85rem; color: #1A1816; line-height: 1.6; border-top: 1px solid rgba(197, 160, 89, 0.2); padding-top: 0.6rem;">
-            <strong>Dedicated Crew Breakdown:</strong>
-            <ul style="margin: 0.3rem 0 0 1.2rem; padding: 0;">
-              ${crewParts.map(c => `<li>${c}</li>`).join('')}
-            </ul>
+        <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem; min-height: 160px; border: 1px solid rgba(197, 160, 89, 0.25); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="font-size: 0.88rem; color: #55524E; font-family: var(--font-paragraph); margin-bottom: 0.4rem; font-weight: 500;">
+              ${e.date || 'TBD Date'} | ${e.location || 'Location'}
+            </div>
+            <h4 style="font-family: var(--font-heading); font-size: 1.4rem; color: #1A1816; margin: 0 0 0.85rem 0; font-weight: 700;">
+              ${e.name || 'Event Title'}
+            </h4>
+            ${crewLines.length > 0 ? `
+              <div style="font-size: 0.88rem; color: #2C2622; line-height: 1.65; border-top: 1px solid rgba(197, 160, 89, 0.2); padding-top: 0.6rem;">
+                ${crewLines.map(c => `<div>${c}</div>`).join('')}
+              </div>
+            ` : ''}
           </div>
         </div>
       `;
@@ -1280,136 +1282,208 @@ function renderProposalPreview() {
     const svcs = activeQuotation.services;
 
     container.innerHTML = `
-      <!-- PAGE 1: COVER PAGE -->
-      <div class="proposal-section-page">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem;">
+      <!-- PAGE 1: COVER PAGE (Matching Reference Image 1) -->
+      <div class="proposal-section-page" style="text-align: center; padding-top: 1rem;">
+        <!-- Tagline Line (Italic Serif) -->
+        <h3 style="font-family: var(--font-heading); font-size: 1.85rem; color: #1A1816; font-weight: 400; font-style: italic; margin: 0 0 0.3rem 0;">
+          Timemachine & Co,
+        </h3>
+
+        <!-- Main Headline (Bold Headline) -->
+        <h1 style="font-family: var(--font-heading); font-size: 2.5rem; color: #1A1816; font-weight: 700; margin: 0 0 0.75rem 0; letter-spacing: -0.02em;">
+          Capturing Your Forever Story
+        </h1>
+
+        <!-- Subtitle -->
+        <p style="font-size: 0.95rem; color: #55524E; max-width: 580px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
+          Exclusive Fine Art Wedding Photography & Cinematography Proposal prepared for <strong>${activeQuotation.clientName || 'Bhavya Allu'}</strong>.
+        </p>
+
+        <!-- Dark Pill Button -->
+        <div style="margin-bottom: 2.5rem;">
+          <span style="display: inline-flex; align-items: center; gap: 0.5rem; background: #1A1816; color: #FFFFFF; font-family: var(--font-ui); font-size: 0.85rem; font-weight: 600; padding: 0.6rem 1.4rem; border-radius: 999px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+            Prepared for ${activeQuotation.clientName || 'Bhavya Allu'} →
+          </span>
+        </div>
+
+        <!-- 3D CURVED ARC GALLERY SHOWCASE (Matching Image 1) -->
+        <div style="perspective: 1000px; display: flex; justify-content: center; align-items: center; gap: 0.6rem; margin: 2rem 0; padding: 1.5rem 0; overflow: hidden;">
+          <!-- Card -3 -->
+          <div style="width: 110px; height: 210px; border-radius: 16px; overflow: hidden; transform: rotateY(38deg) scale(0.78); opacity: 0.82; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.12);">
+            <img src="./images/niharika/groom-lighting.jpg" alt="Gallery 1" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <!-- Card -2 -->
+          <div style="width: 120px; height: 235px; border-radius: 16px; overflow: hidden; transform: rotateY(25deg) scale(0.88); opacity: 0.92; flex-shrink: 0; box-shadow: 0 12px 25px rgba(0,0,0,0.14);">
+            <img src="./images/niharika/bridal-braid.jpg" alt="Gallery 2" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <!-- Card -1 -->
+          <div style="width: 130px; height: 260px; border-radius: 16px; overflow: hidden; transform: rotateY(12deg) scale(0.96); flex-shrink: 0; box-shadow: 0 14px 30px rgba(0,0,0,0.16);">
+            <img src="./images/niharika/lotus-portrait.jpg" alt="Gallery 3" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <!-- Card 0 (Center) -->
+          <div style="width: 140px; height: 285px; border-radius: 16px; overflow: hidden; transform: rotateY(0deg) scale(1.06) translateZ(20px); flex-shrink: 0; z-index: 5; box-shadow: 0 20px 45px rgba(0,0,0,0.22); border: 2px solid rgba(197, 160, 89, 0.4);">
+            <img src="./images/niharika/main-shrine-couple.jpg" alt="Gallery 4" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <!-- Card +1 -->
+          <div style="width: 130px; height: 260px; border-radius: 16px; overflow: hidden; transform: rotateY(-12deg) scale(0.96); flex-shrink: 0; box-shadow: 0 14px 30px rgba(0,0,0,0.16);">
+            <img src="./images/niharika/couple-doorway.jpg" alt="Gallery 5" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <!-- Card +2 -->
+          <div style="width: 120px; height: 235px; border-radius: 16px; overflow: hidden; transform: rotateY(-25deg) scale(0.88); opacity: 0.92; flex-shrink: 0; box-shadow: 0 12px 25px rgba(0,0,0,0.14);">
+            <img src="./images/niharika/pooja-lighting.jpg" alt="Gallery 6" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <!-- Card +3 -->
+          <div style="width: 110px; height: 210px; border-radius: 16px; overflow: hidden; transform: rotateY(-38deg) scale(0.78); opacity: 0.82; flex-shrink: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.12);">
+            <img src="./images/niharika/mandapam-garland.jpg" alt="Gallery 7" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+        </div>
+
+        <!-- 3-COLUMN FEATURE GRID BELOW ARC (Matching Image 1 bottom) -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; text-align: left; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(197, 160, 89, 0.2);">
+          <div style="border-right: 1px solid rgba(197, 160, 89, 0.25); padding-right: 1.25rem;">
+            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0; font-weight: 600;">Fine Art Stills</h4>
+            <p style="font-size: 0.82rem; color: #55524E; line-height: 1.6; margin: 0;">1,000 fully edited images from all events, portraying your wedding story, delivered on cloud within 60 days.</p>
+          </div>
+
+          <div style="border-right: 1px solid rgba(197, 160, 89, 0.25); padding-right: 1.25rem;">
+            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0; font-weight: 600;">Cinematic HD Films</h4>
+            <p style="font-size: 0.82rem; color: #55524E; line-height: 1.6; margin: 0;">4K Teaser trailer + Full Feature Film with original audio remastering & color grading, delivered on cloud within 60 days.</p>
+          </div>
+
           <div>
-            <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #C5A059; font-weight: 700;">FINE ART PROPOSAL</span>
-            <h1 style="font-family: var(--font-heading); font-size: 1.8rem; color: #1A1816; margin: 0.2rem 0 0 0; font-weight: 400;">Timemachine & Co</h1>
-          </div>
-          <div class="proposal-header-logo-badge">TM & CO</div>
-        </div>
-
-        <div style="text-align: center; margin: 2rem 0;">
-          <svg width="60" height="40" viewBox="0 0 100 60" fill="none" stroke="#C5A059" stroke-width="1.5">
-            <path d="M50 30 C30 10, 10 20, 20 40 C30 50, 45 40, 50 30 Z"></path>
-            <path d="M50 30 C70 10, 90 20, 80 40 C70 50, 55 40, 50 30 Z"></path>
-            <circle cx="50" cy="30" r="2" fill="#C5A059"></circle>
-          </svg>
-        </div>
-
-        <div style="text-align: center; margin: 1.5rem 0 2.5rem 0;">
-          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #1A1816; font-weight: 400; line-height: 1.4;">
-            BECAUSE EVERY FRAME HAS A STORY TO TELL
-          </h2>
-          <p style="font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.18em; color: #C5A059; text-transform: uppercase; margin-top: 0.5rem;">
-            Customized Fine Art Photography & Cinema Proposal
-          </p>
-        </div>
-
-        <div class="proposal-divider-star">— ✦ —</div>
-
-        <div style="background: #F5F1E8; border: 1px solid rgba(197, 160, 89, 0.3); border-radius: 10px; padding: 1.75rem; text-align: center; margin-top: 2rem;">
-          <span style="font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #C5A059; font-weight: 600;">PREPARED ESPECIALLY FOR</span>
-          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #1A1816; margin: 0.4rem 0 0.2rem 0;">${activeQuotation.clientName || 'Valued Client'}</h3>
-          <p style="font-size: 0.9rem; color: #55524E; margin: 0.2rem 0 0.8rem 0;">${activeQuotation.coupleNames || ''}</p>
-          <div style="font-size: 0.82rem; color: #C5A059; font-family: var(--font-ui); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">
-            🗓️ ${datesSummary} &nbsp;•&nbsp; 📞 ${activeQuotation.phone || '-'}
+            <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #1A1816; margin: 0 0 0.4rem 0; font-weight: 600;">Signature Albums</h4>
+            <p style="font-size: 0.82rem; color: #55524E; line-height: 1.6; margin: 0;">3 printed albums (40 sheets each) crafted with Italian leather & velvet hardcover finish for timeless family heirlooms.</p>
           </div>
         </div>
       </div>
 
-      <!-- PAGE 2: ABOUT US & SHOWCASE -->
+      <!-- PAGE 2: ABOUT US (Matching Reference Image 2) -->
       <div class="proposal-section-page">
-        <div style="position: relative; border-radius: 10px; overflow: hidden; height: 180px; margin-bottom: 2rem; background: #1A1816;">
-          <img src="./images/niharika/main-shrine-couple.jpg" alt="Showcase Banner" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.65; filter: grayscale(100%);">
-          <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #FFFFFF; padding: 1rem;">
-            <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #E5C98D;">TIMEMACHINE & CO PRESENTS</span>
-            <h2 style="font-family: var(--font-heading); font-size: 1.7rem; font-weight: 400; margin-top: 0.3rem;">Fine Art Wedding Stories</h2>
-          </div>
-        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center;">
+          <!-- Left Overlapping Photos Block -->
+          <div style="position: relative; height: 380px; width: 100%;">
+            <!-- Accent Line behind images -->
+            <div style="position: absolute; left: 0; top: 40%; width: 100%; height: 1px; background: #C5A059; opacity: 0.5; z-index: 1;"></div>
+            
+            <!-- Top Right Horizontal Floating Image -->
+            <div style="position: absolute; top: 0; right: 5%; width: 62%; height: 200px; border-radius: 16px; overflow: hidden; box-shadow: 0 14px 35px rgba(0,0,0,0.14); z-index: 2; border: 1px solid #EAE3D2;">
+              <img src="./images/niharika/doorway-portrait.jpg" alt="About Showcase 1" style="width:100%; height:100%; object-fit:cover;">
+            </div>
 
-        <div style="max-width: 680px; margin: 0 auto; text-align: center; font-size: 0.92rem; line-height: 1.75; color: #3A3733;">
-          <p style="margin-bottom: 1rem;">
-            "When we started Timemachine & Co, it was more than just clicking pictures—it was about capturing love, joy, and everything in between. Our shared passion for cinema, art, and visual storytelling brought us together."
-          </p>
-        </div>
+            <!-- Bottom Left Vertical Floating Image -->
+            <div style="position: absolute; top: 80px; left: 2%; width: 55%; height: 280px; border-radius: 16px; overflow: hidden; box-shadow: 0 18px 45px rgba(0,0,0,0.18); z-index: 3; border: 2px solid #FFFFFF;">
+              <img src="./images/niharika/pooja-prayer.jpg" alt="About Showcase 2" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+          </div>
 
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 2rem;">
-          <div style="height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid #EAE3D2;">
-            <img src="./images/niharika/lotus-portrait.jpg" alt="Gallery 1" style="width:100%; height:100%; object-fit:cover;">
-          </div>
-          <div style="height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid #EAE3D2;">
-            <img src="./images/niharika/pooja-lighting.jpg" alt="Gallery 2" style="width:100%; height:100%; object-fit:cover;">
-          </div>
-          <div style="height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid #EAE3D2;">
-            <img src="./images/niharika/main-shrine-couple.jpg" alt="Gallery 3" style="width:100%; height:100%; object-fit:cover;">
+          <!-- Right Text Content Block -->
+          <div style="padding-left: 1rem;">
+            <div style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #C5A059; font-weight: 700; margin-bottom: 0.4rem;">
+              OUR CINEMATIC JOURNEY
+            </div>
+            <h2 style="font-family: var(--font-heading); font-size: 2.2rem; color: #1A1816; margin: 0 0 1.25rem 0; font-weight: 400;">
+              About Us
+            </h2>
+
+            <p style="font-family: var(--font-ui); font-size: 0.85rem; color: #3A3733; line-height: 1.8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.25rem;">
+              AT TIMEMACHINE & CO, WE FREEZE FLEETING MOMENTS TO MAKE YOUR FOREVER LOVE STORY A TIMELESS MASTERPIECE. OUR SHARED PASSION FOR CINEMA, ART, AND VISUAL STORYTELLING BRINGS OUT THE MAGIC OF YOUR WEDDING INTO A TAPESTRY OF EMOTIONS.
+            </p>
+
+            <p style="font-family: var(--font-ui); font-size: 0.85rem; color: #55524E; line-height: 1.8; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+              WE WEAVE TRADITIONS, RITUALS, AND ELEGANT MOMENTS INTO VISUAL HEIRLOOMS TO BE TREASURED FOR GENERATIONS TO COME. DISCUSS DETAILS WITH OUR LEAD CINEMATOGRAPHERS AND EMBARK ON A SEAMLESS VISUAL JOURNEY.
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- PAGE 3: YOUR EVENTS BREAKDOWN -->
+      <!-- PAGE 3: YOUR EVENTS (Matching Reference Image 3) -->
       <div class="proposal-section-page">
-        <div style="text-align: center; margin-bottom: 2rem;">
-          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #C5A059; font-weight: 700;">EVENT SCHEDULE & STAFFING</span>
-          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #1A1816; margin-top: 0.2rem; font-weight: 400;">Your Celebration Events</h2>
-        </div>
+        <h2 style="font-family: var(--font-heading); font-size: 2.2rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 700;">
+          Your Events
+        </h2>
 
-        <div class="proposal-card-grid">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem;">
           ${eventsHtml || '<p style="text-align:center;">No events configured.</p>'}
         </div>
       </div>
 
-      <!-- PAGE 4: SERVICES OFFERED & PRICING -->
+      <!-- PAGE 4: SERVICES OFFERED & PRICING (Matching Reference Image 4) -->
       <div class="proposal-section-page">
-        <div style="text-align: center; margin-bottom: 2rem;">
-          <span style="font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #C5A059; font-weight: 700;">DELIVERABLES ARCHIVE</span>
-          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #1A1816; margin-top: 0.2rem; font-weight: 400;">Services Offered & Deliverables</h2>
-        </div>
+        <h2 style="font-family: var(--font-heading); font-size: 2.2rem; color: #1A1816; margin: 0 0 1.75rem 0; font-weight: 700;">
+          Services Offered
+        </h2>
 
-        <div class="proposal-card-grid">
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
           ${svcs.pictures ? `
-            <div class="proposal-event-card">
-              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">📸</div>
-              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Edited Pictures</h4>
-              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">Color-graded high-res stills delivered via private online gallery.</p>
+            <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Edited Pictures</h4>
+              <p style="font-size: 0.92rem; color: #2C2622; line-height: 1.65; margin: 0;">
+                You shall receive 1,000 fully edited images from all events, portraying your wedding story, delivered on the cloud within 60 days from payment clearance.
+              </p>
             </div>
           ` : ''}
 
           ${svcs.films ? `
-            <div class="proposal-event-card">
-              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">🎬</div>
-              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Cinematic Wedding Film</h4>
-              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">4K Teaser trailer + Full Feature Film with original audio remastering & color grading.</p>
+            <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Cinematic Wedding Films</h4>
+              <p style="font-size: 0.92rem; color: #2C2622; line-height: 1.65; margin: 0 0 0.8rem 0;">
+                1 cinematic HD film with the best footage from your events, edited according to our style, to be delivered on cloud within 60 days from payment clearance. You can suggest any number of changes but all at once and within a week of delivery.
+              </p>
+              <div style="font-size: 0.85rem; color: #55524E; font-style: italic;">
+                *Changes will be accepted only once from 2nd time Rs 15,000 will be charged extra.
+              </div>
             </div>
           ` : ''}
 
           ${svcs.albums ? `
-            <div class="proposal-event-card">
-              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">📖</div>
-              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Printed Albums</h4>
-              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">Handcrafted Italian Leather & Velvet Fine-Art printed hardcover wedding albums.</p>
+            <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Printed Albums</h4>
+              <p style="font-size: 0.92rem; color: #2C2622; line-height: 1.65; margin: 0;">
+                You shall receive 3 Printed albums from the best events each album has 40 sheets. An extra sheet will incur an additional charge of ₹600 per sheet.
+              </p>
             </div>
           ` : ''}
 
           ${svcs.videos ? `
-            <div class="proposal-event-card">
-              <div style="font-size: 1.4rem; margin-bottom: 0.4rem;">🎥</div>
-              <h4 style="font-family: var(--font-heading); font-size: 1.05rem; margin: 0 0 0.3rem 0; color: #1A1816;">Traditional Videos</h4>
-              <p style="font-size: 0.82rem; color: #55524E; margin: 0; line-height: 1.5;">Full-length uncut video coverage of ritual proceedings.</p>
+            <div style="background: #F3EBDD; border-radius: 12px; padding: 1.5rem;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.2rem; color: #1A1816; margin: 0 0 0.5rem 0; font-weight: 600;">Traditional Videos</h4>
+              <p style="font-size: 0.92rem; color: #2C2622; line-height: 1.65; margin: 0;">
+                You shall receive 5 long traditional video of all events in documentary style, delivered within 75 days from payment clearance.
+              </p>
             </div>
           ` : ''}
         </div>
 
-        <div class="proposal-divider-star">— ✦ —</div>
+        <div style="text-align: center; margin: 3rem 0 2rem 0;">
+          <!-- Custom Gold Star Line Divider matching Image 4 -->
+          <svg width="280" height="20" viewBox="0 0 280 20" fill="none" style="margin: 0 auto; display: block;">
+            <line x1="0" y1="10" x2="110" y2="10" stroke="#C5A059" stroke-width="1.2" opacity="0.6"></line>
+            <circle cx="110" cy="10" r="3" fill="#C5A059"></circle>
+            <path d="M140 3 L143 10 L140 17 L137 10 Z" fill="#C5A059"></path>
+            <circle cx="170" cy="10" r="3" fill="#C5A059"></circle>
+            <line x1="170" y1="10" x2="280" y2="10" stroke="#C5A059" stroke-width="1.2" opacity="0.6"></line>
+          </svg>
 
-        <div class="proposal-price-box">
-          <span style="font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase; color: #C5A059; font-weight: 700;">TOTAL COMMISSION INVESTMENT</span>
-          <p style="font-size: 1rem; color: #1A1816; margin: 0.6rem 0 0.2rem 0; font-family: var(--font-paragraph);">
-            Dear <strong>${activeQuotation.clientName || 'Client'}</strong>, Your final quote price would be:
-          </p>
-          <div class="proposal-price-val">₹ ${calculatedTotal}</div>
-          <p style="font-size: 0.8rem; color: #757069; margin: 0;">(Inclusive of all crew travel, editing, color grading & production costs)</p>
+          <!-- Quote Price Callout Box matching Image 4 -->
+          <div style="padding: 2.5rem 1rem;">
+            <h3 style="font-family: var(--font-heading); font-size: 2.2rem; color: #C5A059; margin: 0 0 0.5rem 0; font-weight: 700;">
+              Dear ${activeQuotation.clientName || 'Bhavya Allu'}
+            </h3>
+            <p style="font-size: 1rem; color: #2C2622; margin: 0 0 1.25rem 0; font-family: var(--font-paragraph);">
+              Your final quote price would be
+            </p>
+            <div style="font-family: var(--font-heading); font-size: 3.2rem; color: #C5A059; font-weight: 700;">
+              ₹${calculatedTotal || activeQuotation.totalPrice || '2,50,000'}
+            </div>
+          </div>
+
+          <svg width="280" height="20" viewBox="0 0 280 20" fill="none" style="margin: 0 auto; display: block;">
+            <line x1="0" y1="10" x2="110" y2="10" stroke="#C5A059" stroke-width="1.2" opacity="0.6"></line>
+            <circle cx="110" cy="10" r="3" fill="#C5A059"></circle>
+            <path d="M140 3 L143 10 L140 17 L137 10 Z" fill="#C5A059"></path>
+            <circle cx="170" cy="10" r="3" fill="#C5A059"></circle>
+            <line x1="170" y1="10" x2="280" y2="10" stroke="#C5A059" stroke-width="1.2" opacity="0.6"></line>
+          </svg>
         </div>
       </div>
 
@@ -1444,6 +1518,7 @@ function renderProposalPreview() {
         <div style="font-size: 0.78rem; color: #8C8780; text-align: center; margin-top: 2.5rem; border-top: 1px solid rgba(197, 160, 89, 0.2); padding-top: 1.25rem;">
           Timemachine & Co • Fine Art Wedding Cinematography & Photography • All Rights Reserved.
         </div>
+      </div>
     `;
   }
 }
