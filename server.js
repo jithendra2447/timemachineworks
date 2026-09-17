@@ -79,11 +79,11 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================================================
-// API ROUTES
+// API ROUTES (Flexible Route Aliases for Vercel Serverless & Local)
 // ==========================================================================
 
 // Health Check
-app.get('/api/health', async (req, res) => {
+app.get(['/api/health', '/health'], async (req, res) => {
   const connected = await connectDB();
   res.json({
     status: 'ok',
@@ -95,7 +95,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // POST /api/quote - Save Quote to MongoDB & Google Sheets
-app.post('/api/quote', async (req, res) => {
+app.post(['/api/quote', '/quote', '/api/quote.js'], async (req, res) => {
   try {
     const { clientName, groomName, brideName, countryCode, phone, events } = req.body;
 
@@ -160,9 +160,10 @@ app.post('/api/quote', async (req, res) => {
 
 
 // GET /api/quotes - Retrieve List of Quotes (Admin / Studio Testing)
-app.get('/api/quotes', async (req, res) => {
+app.get(['/api/quotes', '/quotes'], async (req, res) => {
   try {
-    if (isMongoConnected) {
+    const connected = await connectDB();
+    if (connected || isMongoConnected) {
       const quotes = await Quote.find().sort({ createdAt: -1 });
       return res.json({ success: true, count: quotes.length, data: quotes });
     } else {
@@ -172,6 +173,7 @@ app.get('/api/quotes', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 // Serve production static assets if dist exists
 app.use(express.static(path.join(__dirname, 'dist')));
